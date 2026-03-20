@@ -46,46 +46,17 @@ const prompt = ai.definePrompt({
   name: 'scanPhysicalBillPrompt',
   input: {schema: ScanPhysicalBillInputSchema},
   output: {schema: ScanPhysicalBillOutputSchema},
-  prompt: `You are an expert at extracting structured information from images of physical receipts and bills.
-Your task is to analyze the provided image of a physical bill and extract the following details:
-- The name of the establishment (place of transaction).
-- The date of the transaction (if clearly visible), in YYYY-MM-DD format.
-- A list of individual items, each with its description and amount.
-- The subtotal amount.
-- The tax amount.
-- The tip amount (if present and clearly labeled).
-- The grand total amount.
+  prompt: `You are an expert at extracting structured information from images of physical receipts. Your task is to analyze the provided image and extract bill details.
 
-Be precise with amounts and descriptions. If a tip is not explicitly stated, omit the 'tip' field.
-If the date is not clearly visible, omit the 'date' field.
+- Identify the establishment's name ('placeOfTransaction').
+- Find the transaction date ('date') in YYYY-MM-DD format. Omit if unclear.
+- List all individual 'items', each with a 'description' and 'amount'.
+- Extract the 'subtotal', 'tax', and 'total' amounts.
+- Extract the 'tip' amount if specified.
+
+IMPORTANT: If any numeric value (subtotal, tax, tip, total, or item amounts) is not found or unclear, use 0 as the default.
 
 Image of the bill: {{media url=photoDataUri}}`,
-  config: {
-    // Using gemini-2.5-flash-image for multimodal capabilities
-    model: 'googleai/gemini-2.5-flash-image',
-    responseModalities: ['TEXT'], // We only expect structured text output
-    // Configure safety settings to be more lenient for receipt text extraction,
-    // as receipts might contain sensitive or financial information that could
-    // be flagged by overly strict filters.
-    safetySettings: [
-      {
-        category: 'HARM_CATEGORY_HATE_SPEECH',
-        threshold: 'BLOCK_NONE',
-      },
-      {
-        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-        threshold: 'BLOCK_NONE',
-      },
-      {
-        category: 'HARM_CATEGORY_HARASSMENT',
-        threshold: 'BLOCK_NONE',
-      },
-      {
-        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-        threshold: 'BLOCK_NONE',
-      },
-    ],
-  },
 });
 
 const scanPhysicalBillFlow = ai.defineFlow(
