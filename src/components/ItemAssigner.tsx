@@ -40,9 +40,9 @@ export default function ItemAssigner({
                   placeholder="Item Name"
                 />
 
-                {/* Qty and Price */}
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
+                {/* Qty and Price - updated for mobile */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
                       <label htmlFor={`qty-${item.id}`} className="text-xs font-medium">Qty</label>
                       <Input
                         id={`qty-${item.id}`}
@@ -55,7 +55,7 @@ export default function ItemAssigner({
                         className="w-20 h-9 text-center bg-muted/50 rounded-md border-input"
                       />
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
                       <label htmlFor={`price-${item.id}`} className="text-xs font-medium">Price (₹)</label>
                       <Input
                         id={`price-${item.id}`}
