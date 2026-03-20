@@ -8,7 +8,7 @@ import FriendManager from '@/components/FriendManager';
 import ItemAssigner from '@/components/ItemAssigner';
 import SplitSummary from '@/components/SplitSummary';
 import { BillItem, calculateSplits, SplitMode } from '@/lib/bill-utils';
-import type { ScanPhysicalBillOutput } from '@/ai/flows/scan-physical-bill-flow';
+import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -102,21 +102,21 @@ export default function BillSplitter() {
 
   const billTotal = useMemo(() => billMeta.subtotal + billMeta.tax + billMeta.tip, [billMeta]);
 
-  const onDataExtracted = (data: ScanPhysicalBillOutput) => {
+  const onDataExtracted = (data: ExtractBillItemsOutput) => {
     const formattedItems: BillItem[] = data.items.map((it, idx) => ({
       id: `item-${idx}-${Date.now()}`,
-      name: it.description,
-      quantity: 1, // Default quantity
-      price: it.amount, // Assume price is the full amount
-      lineTotal: it.amount,
+      name: it.name,
+      quantity: it.quantity,
+      price: it.price,
+      lineTotal: it.lineTotal,
     }));
     setItems(formattedItems);
     setOriginalItems([...formattedItems]);
-    setRestaurantName(data.placeOfTransaction || "");
+    setRestaurantName(data.restaurantName || "");
     setBillMeta({
       tax: data.tax,
       tip: data.tip || 0,
-      subtotal: data.subtotal || formattedItems.reduce((sum, it) => sum + it.lineTotal, 0)
+      subtotal: data.subtotal > 0 ? data.subtotal : formattedItems.reduce((sum, it) => sum + it.lineTotal, 0)
     });
 
     setShowSuccessModal(true);

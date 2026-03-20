@@ -6,10 +6,10 @@ import { Camera, Upload, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { analyzeBillImage } from '@/app/actions';
-import type { ScanPhysicalBillOutput } from '@/ai/flows/scan-physical-bill-flow';
+import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 
 interface BillUploaderProps {
-  onDataExtracted: (data: ScanPhysicalBillOutput) => void;
+  onDataExtracted: (data: ExtractBillItemsOutput) => void;
 }
 
 const MAX_IMAGE_SIZE = 1024; // pixels
@@ -91,7 +91,7 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
     } catch (e) {
       const err = e instanceof Error ? e : new Error('An unknown error occurred');
       console.error(err);
-      const errorMessage = 'Scan failed. Please try again with a clearer image.';
+      const errorMessage = err.message || 'Scan failed. Please try again with a clearer image.';
       setError(errorMessage);
       toast({
         variant: 'destructive',

@@ -1,10 +1,10 @@
 'use server';
 
 import { 
-  scanPhysicalBill,
-  ScanPhysicalBillInput,
-  ScanPhysicalBillOutput
-} from '@/ai/flows/scan-physical-bill-flow';
+  extractBillItems,
+  ExtractBillItemsInput,
+  ExtractBillItemsOutput
+} from '@/ai/flows/extract-bill-items-flow';
 import { 
   uploadDigitalBill,
   UploadDigitalBillInput,
@@ -26,16 +26,15 @@ type ActionResult<T> = {
 
 export async function analyzeBillImage(
   dataUri: string
-): Promise<ActionResult<ScanPhysicalBillOutput>> {
+): Promise<ActionResult<ExtractBillItemsOutput>> {
   try {
-    const input: ScanPhysicalBillInput = { photoDataUri: dataUri };
-    // The AI flow function is already an async function
-    const result = await scanPhysicalBill(input);
+    const input: ExtractBillItemsInput = { photoDataUri: dataUri };
+    const result = await extractBillItems(input);
     return { success: true, data: result };
   } catch (e) {
     const error = e instanceof Error ? e : new Error('Unknown error');
     console.error('Error analyzing bill image:', error.message);
-    return { success: false, error: 'Failed to analyze the bill image. Please try again.' };
+    return { success: false, error: error.message || 'Failed to analyze the bill image. Please try again.' };
   }
 }
 
