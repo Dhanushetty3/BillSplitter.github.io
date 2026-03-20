@@ -228,10 +228,10 @@ Thanks!`;
                           variant="ghost" 
                           size="icon" 
                           disabled={hasError}
-                          className="h-8 w-8 hover:bg-green-100 disabled:opacity-30 rounded-full transition-all"
+                          className="h-8 w-8 disabled:opacity-30 rounded-full transition-all"
                           onClick={() => shareWhatsApp(res)}
                         >
-                          <WhatsappIcon className="w-4 h-4" />
+                          <WhatsappIcon className="w-5 h-5" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>{hasError ? "Incomplete split" : "Share via WhatsApp"}</TooltipContent>
@@ -245,10 +245,10 @@ Thanks!`;
                           variant="ghost" 
                           size="icon" 
                           disabled={hasError}
-                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100 disabled:opacity-30 rounded-full transition-all"
+                          className="h-8 w-8 text-blue-600 hover:text-blue-700 disabled:opacity-30 rounded-full transition-all"
                           onClick={() => shareSMS(res)}
                         >
-                          <SmsIcon className="w-4 h-4" />
+                          <SmsIcon className="w-5 h-5" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>{hasError ? "Incomplete split" : "Share via SMS"}</TooltipContent>
