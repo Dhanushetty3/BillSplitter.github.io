@@ -5,6 +5,7 @@ import { User, Check, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { BillItem } from '@/lib/bill-utils';
 import { cn } from '@/lib/utils';
 
@@ -32,62 +33,64 @@ export default function ItemAssigner({
         return (
           <Card key={item.id} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md">
             <CardContent className="p-4 space-y-4">
-                {/* Item Name */}
-                <Input
-                  value={item.name}
-                  onChange={(e) => onUpdateItem(item.id, { name: e.target.value })}
-                  className="h-auto p-0 text-lg font-bold border-none focus-visible:ring-0 bg-transparent w-full"
-                  placeholder="Item Name"
-                />
-
-                {/* Qty and Price - updated for mobile */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                      <label htmlFor={`qty-${item.id}`} className="text-xs font-medium">Qty</label>
-                      <Input
-                        id={`qty-${item.id}`}
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => {
-                          const q = parseInt(e.target.value);
-                          onUpdateItem(item.id, { quantity: isNaN(q) ? 0 : q });
-                        }}
-                        className="w-20 h-9 text-center bg-muted/50 rounded-md border-input"
-                      />
-                    </div>
-                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                      <label htmlFor={`price-${item.id}`} className="text-xs font-medium">Price (₹)</label>
-                      <Input
-                        id={`price-${item.id}`}
-                        type="number"
-                        step="0.01"
-                        value={item.price}
-                        onChange={(e) => {
-                          const p = parseFloat(e.target.value);
-                          onUpdateItem(item.id, { price: isNaN(p) ? 0 : p });
-                        }}
-                        className="w-24 h-9 text-center bg-muted/50 rounded-md border-input"
-                      />
-                    </div>
-                </div>
-
-                {/* Total and Delete */}
-                <div className="flex justify-between items-center pt-2">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Total</p>
-                    <p className="text-xl font-bold text-primary">₹{item.lineTotal.toFixed(2)}</p>
-                  </div>
-                  <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDeleteItem(item.id)}
-                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full h-10 w-10"
+                <div className="flex justify-between items-start">
+                    <Input
+                    value={item.name}
+                    onChange={(e) => onUpdateItem(item.id, { name: e.target.value })}
+                    className="h-auto p-0 text-lg font-bold border-none focus-visible:ring-0 bg-transparent w-full"
+                    placeholder="Item Name"
+                    />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDeleteItem(item.id)}
+                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full h-10 w-10 shrink-0 ml-2"
                     >
-                      <Trash2 className="w-5 h-5" />
-                  </Button>
+                        <Trash2 className="w-5 h-5" />
+                    </Button>
                 </div>
                 
-                {/* Divider and Assign To */}
+
+                <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 pt-2">
+                    <div className="flex items-end gap-3 sm:gap-4">
+                        <div className="grid gap-1.5">
+                            <Label htmlFor={`qty-${item.id}`} className="text-xs font-medium">Qty</Label>
+                            <Input
+                                id={`qty-${item.id}`}
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => {
+                                const q = parseInt(e.target.value);
+                                onUpdateItem(item.id, { quantity: isNaN(q) ? 0 : q });
+                                }}
+                                className="w-16 h-9 text-center bg-muted/50 rounded-md border-input"
+                            />
+                        </div>
+                        <div className="grid gap-1.5">
+                            <Label htmlFor={`price-${item.id}`} className="text-xs font-medium">Price</Label>
+                            <div className="flex items-center">
+                                <span className="text-sm text-muted-foreground mr-1">₹</span>
+                                <Input
+                                    id={`price-${item.id}`}
+                                    type="number"
+                                    step="0.01"
+                                    value={item.price}
+                                    onChange={(e) => {
+                                    const p = parseFloat(e.target.value);
+                                    onUpdateItem(item.id, { price: isNaN(p) ? 0 : p });
+                                    }}
+                                    className="w-24 h-9 text-center bg-muted/50 rounded-md border-input"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="text-right">
+                        <p className="text-xs text-muted-foreground">Item Total</p>
+                        <p className="text-xl font-bold text-primary">₹{item.lineTotal.toFixed(2)}</p>
+                    </div>
+                </div>
+
                 <div className="border-t border-border/50 pt-4">
                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Assign to:</p>
                     <div className="flex flex-wrap gap-2">
