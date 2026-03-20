@@ -358,7 +358,7 @@ export default function BillSplitter() {
               onClick={handleRevertConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Revert to Scanned
+              Revert
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -684,14 +684,15 @@ export default function BillSplitter() {
                   )}
 
                   <div className="pt-8 flex justify-end">
-                    <Button 
-                      size="lg" 
-                      onClick={() => setActiveTab("summary")}
-                      disabled={totalMismatch}
-                      className="w-full sm:w-auto px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-lg h-14 rounded-full disabled:opacity-50 transition-all hover:scale-105"
-                    >
-                      View Split Summary
-                    </Button>
+                    {!totalMismatch && (
+                      <Button
+                        size="lg"
+                        onClick={() => setActiveTab('summary')}
+                        className="w-full sm:w-auto px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-lg h-14 rounded-full transition-all hover:scale-105 animate-in fade-in"
+                      >
+                        View Split Summary
+                      </Button>
+                    )}
                   </div>
                 </TabsContent>
 
