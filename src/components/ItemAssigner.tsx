@@ -37,7 +37,7 @@ export default function ItemAssigner({
                     <Input
                     value={item.name}
                     onChange={(e) => onUpdateItem(item.id, { name: e.target.value })}
-                    className="h-auto p-0 text-lg font-bold border-none focus-visible:ring-0 bg-transparent w-full"
+                    className="h-auto p-0 text-lg font-bold border-none focus-visible:ring-0 bg-transparent w-full text-primary"
                     placeholder="Item Name"
                     />
                     <Button
@@ -91,7 +91,7 @@ export default function ItemAssigner({
                     </div>
                 </div>
 
-                <div className="border-t border-border/50 pt-3 mt-2">
+                <div className="border-t border-border/50 pt-3 mt-4">
                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Assign to:</p>
                     <div className="flex flex-wrap gap-2">
                       {friends.map((friend) => {
