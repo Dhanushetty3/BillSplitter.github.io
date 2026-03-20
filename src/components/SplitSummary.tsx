@@ -228,7 +228,7 @@ Thanks!`;
                           variant="ghost" 
                           size="icon" 
                           disabled={hasError}
-                          className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100 disabled:opacity-30 rounded-full transition-all"
+                          className="h-8 w-8 hover:bg-green-100 disabled:opacity-30 rounded-full transition-all"
                           onClick={() => shareWhatsApp(res)}
                         >
                           <WhatsappIcon className="w-4 h-4" />
