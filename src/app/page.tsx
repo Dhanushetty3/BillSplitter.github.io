@@ -512,40 +512,11 @@ export default function BillSplitter() {
                 </TabsList>
 
                 <TabsContent value="scan" className="mt-0 focus-visible:outline-none">
-                  <div className="bg-card rounded-2xl p-10 shadow-sm border border-border overflow-hidden animate-in zoom-in-95 duration-[1500ms]">
-                    <div className="text-center space-y-8">
-                      <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2 animate-in zoom-in duration-[1000ms]">
-                        <CheckCircle2 className="w-12 h-12" />
-                      </div>
-                      
-                      <div className="animate-in fade-in slide-in-from-bottom-4 duration-[1000ms]">
-                        <h3 className="text-2xl font-bold mb-2">Receipt Analyzed!</h3>
-                        <p className="text-base text-muted-foreground">
-                          We found <span className="font-bold text-foreground">{items.length} items</span> totaling <span className="font-bold text-foreground">₹{billMeta.subtotal.toFixed(2)}</span>.
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-4 max-w-xs mx-auto animate-in fade-in slide-in-from-bottom-6 duration-[1500ms]">
-                        <Button 
-                          onClick={() => {
-                            if (friends.length === 0) {
-                              const section = document.getElementById('group-members-section');
-                              section?.scrollIntoView({ behavior: 'smooth' });
-                            } else {
-                              setActiveTab("assign");
-                            }
-                          }}
-                          className="w-full bg-primary h-12 text-base font-bold shadow-md hover:bg-primary/90 rounded-full"
-                        >
-                          {friends.length === 0 ? "Add members to Assign" : "Yes, Let's Assign!"}
-                        </Button>
-
-                        <div className="pt-8 border-t mt-4">
-                          <p className="text-xs text-muted-foreground mb-4 italic font-medium">Wrong items or poor scan?</p>
-                          <BillUploader onDataExtracted={onDataExtracted} />
-                        </div>
-                      </div>
-                    </div>
+                  <div className="bg-card rounded-2xl p-6 md:p-8 shadow-sm border border-border">
+                    <p className="text-sm text-center text-muted-foreground mb-4 font-medium">
+                      Wrong items or poor scan?
+                    </p>
+                    <BillUploader onDataExtracted={onDataExtracted} />
                   </div>
                 </TabsContent>
 
