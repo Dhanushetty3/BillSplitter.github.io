@@ -32,7 +32,7 @@ export default function ItemAssigner({
         const itemAssignments = assignments[item.id] || [];
         return (
           <Card key={item.id} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md">
-            <CardContent className="p-4 space-y-4">
+            <CardContent className="p-4">
                 <div className="flex justify-between items-start">
                     <Input
                     value={item.name}
@@ -51,7 +51,7 @@ export default function ItemAssigner({
                 </div>
                 
 
-                <div className="flex justify-between items-end gap-4">
+                <div className="flex justify-between items-end gap-4 mt-2">
                     <div className="flex items-end gap-2">
                         <div className="grid gap-1.5">
                             <Label htmlFor={`qty-${item.id}`} className="text-xs font-medium">Qty</Label>
@@ -91,7 +91,7 @@ export default function ItemAssigner({
                     </div>
                 </div>
 
-                <div className="border-t border-border/50 pt-4">
+                <div className="border-t border-border/50 pt-3 mt-2">
                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Assign to:</p>
                     <div className="flex flex-wrap gap-2">
                       {friends.map((friend) => {
