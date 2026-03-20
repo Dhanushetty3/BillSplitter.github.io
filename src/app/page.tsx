@@ -19,11 +19,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 import type { DemoBillData } from '@/app/actions';
 
 export default function BillSplitter() {
-  const { toast } = useToast();
   const [items, setItems] = useState<BillItem[]>([]);
   const [originalItems, setOriginalItems] = useState<BillItem[]>([]);
   const [friends, setFriends] = useState<string[]>([]);
@@ -145,10 +143,6 @@ export default function BillSplitter() {
   const handleRevertConfirm = () => {
     setItems([...originalItems]);
     setShowRevertDialog(false);
-    toast({
-      title: "Changes Reverted",
-      description: "The item list has been restored to the original scanned version.",
-    });
   };
 
   const handleToggleAssignment = (itemId: string, friend: string) => {
@@ -355,7 +349,7 @@ export default function BillSplitter() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to revert?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will discard all manual changes to the item list and restore it to the state it was in after the last successful scan. Any manually added items will be lost.
+            All added or modified items will be removed, and the bill will return to the original scan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -753,3 +747,5 @@ function PercentageInput({ value, onChange }: { value: number; onChange: (val: n
     />
   );
 }
+
+    
