@@ -54,12 +54,46 @@ Thanks!`;
     window.open(`sms:${separator}body=${text}`, '_blank');
   };
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const doc = new jsPDF();
     const dateStr = new Date().toLocaleDateString();
 
+    const convertSvgToPng = (svgDataUrl: string): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = svgDataUrl;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          // Upscale for better quality in PDF
+          canvas.width = img.width * 4;
+          canvas.height = img.height * 4;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const pngDataUrl = canvas.toDataURL("image/png");
+            resolve(pngDataUrl);
+          } else {
+            reject(new Error("Could not get canvas context to convert SVG."));
+          }
+        };
+        img.onerror = (err) => {
+          console.error("SVG to PNG conversion error:", err);
+          reject(new Error("Failed to load SVG image for PDF conversion."));
+        };
+      });
+    };
+
     // --- Logo ---
     const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwIDRIM0MyLjg5NTQzIDQgMiA0Ljg5NTQzIDIgNlYxOEMyIDE5LjEwNDYgMi44OTU0MyAyMCA0IDIwSDIwQzIxLjEwNDYgMjAgMjIgMTkuMTA0NiAyMiAxOFY2QzIyIDQuODk1NDMgMjEuMTA0NiA0IDIwIDRaIiBmaWxsPSIjM0I4MkY2Ii8+CjxwYXRoIGQ9Ik0xMi42MzY0IDguNTQ1NDVIOS40NTQ1NVY5LjYzNjM2SDEyLjA5MDlDMTIuNjgxOCA5LjYzNjM2IDEzLjE4MTggMTAuMTM2NCAxMy4xODE4IDEwLjcyNzNWMTEuMjcyN0MxMy4xODE4IDExLjg2MzYgMTIuNjgxOCAxMi4zNjM2IDEyLjA5MDkgMTIuMzYzNkg5LjQ1NDU1VjEzLjQ1NDVIMTIuMDkwOUMxMi42ODE4IDEzLjQ1NDUgMTMuMTgxOCAxMy45NTQ1IDEzLjE4MTggMTQuNTQ1NVYxNS4wOTA5QzEzLjE4MTggMTUuNjgwOCAxMi42ODE4IDE2LjE4MTggMTIuMDkwOSAxNi4xODE4SDguOTA5MDkiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTguOTA5MDkgMTAuNzI3M0gxMy4xODE4IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+    
+    let logoPngDataUrl: string;
+    try {
+      logoPngDataUrl = await convertSvgToPng(logoDataUrl);
+    } catch (error) {
+      console.error(error);
+      // Fallback if conversion fails, proceed without logo
+      logoPngDataUrl = '';
+    }
 
     // --- Theme and Config ---
     const primaryColor = "#3B82F6"; // blue-500 from Tailwind
@@ -72,11 +106,13 @@ Thanks!`;
 
     // --- Helper Functions ---
     const drawHeader = (title: string) => {
-        doc.addImage(logoDataUrl, 'SVG', pageMargin, 18, 10, 10);
+        if (logoPngDataUrl) {
+          doc.addImage(logoPngDataUrl, 'PNG', pageMargin, 18, 10, 10);
+        }
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
         doc.setTextColor(primaryColor);
-        doc.text("BillSplitter", pageMargin + 14, 25);
+        doc.text("BillSplitter", pageMargin + (logoPngDataUrl ? 14 : 0), 25);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(14);
@@ -364,7 +400,7 @@ Thanks!`;
                 </div>
               </div>
               <h3 className="text-xl font-black flex items-center gap-1.5">
-                <span className="text-sm opacity-80">₹</span>
+                <span className="text-sm opacity-80">Rs.</span>
                 {total.toFixed(2)}
               </h3>
             </div>
@@ -372,11 +408,11 @@ Thanks!`;
             <div className="flex gap-8 border-t md:border-t-0 md:border-l border-white/20 pt-6 md:pt-0 md:pl-10 w-full md:w-auto justify-center md:justify-start">
               <div className="text-center">
                 <p className="text-primary-foreground/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">Total Tax</p>
-                <p className="font-bold text-sm">₹{tax.toFixed(2)}</p>
+                <p className="font-bold text-sm">Rs.{tax.toFixed(2)}</p>
               </div>
               <div className="text-center">
                 <p className="text-primary-foreground/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">Total Tip</p>
-                <p className="font-bold text-sm">₹{tip.toFixed(2)}</p>
+                <p className="font-bold text-sm">Rs.{tip.toFixed(2)}</p>
               </div>
             </div>
           </div>
