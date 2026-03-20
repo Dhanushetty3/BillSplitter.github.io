@@ -134,10 +134,6 @@ export default function BillSplitter() {
         const section = document.getElementById('group-members-section');
         if (section) {
           section.scrollIntoView({ behavior: 'smooth' });
-          toast({
-            title: "Next Step",
-            description: "Add your friends below to start splitting the bill!",
-          });
         }
       }, 300);
     }
@@ -681,7 +677,7 @@ export default function BillSplitter() {
                       size="lg" 
                       onClick={() => setActiveTab("summary")}
                       disabled={totalMismatch}
-                      className="w-full sm:w-auto px-10 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-black shadow-lg h-14 rounded-full disabled:opacity-50 transition-all hover:scale-105"
+                      className="w-full sm:w-auto px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-lg h-14 rounded-full disabled:opacity-50 transition-all hover:scale-105"
                     >
                       View Split Summary
                     </Button>

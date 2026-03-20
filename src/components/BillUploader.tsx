@@ -127,7 +127,7 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
 
       <h2 className="text-xl font-headline font-semibold mb-2">Scan Your Bill</h2>
       <p className="text-muted-foreground text-center mb-6 max-w-xs text-sm">
-        Use your camera or upload a photo to extract items automatically.
+      Take a pic of your bill or upload it - We'll handle the annoying part
       </p>
       
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
@@ -137,7 +137,7 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
           className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold h-11"
         >
           <Camera className="w-4 h-4 mr-2" />
-          Take Photo
+          Take a Pic
         </Button>
         
         <Button 
@@ -147,7 +147,7 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
           className="flex-1 border-primary/30 text-primary hover:bg-primary/5 h-11"
         >
           <Upload className="w-4 h-4 mr-2" />
-          Upload
+          Upload Bill
         </Button>
         
         {/* Hidden inputs for native handlers */}
