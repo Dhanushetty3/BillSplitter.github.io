@@ -408,8 +408,14 @@ export default function BillSplitter() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 animate-in fade-in duration-[2000ms]">
-            <div className="lg:col-span-4 space-y-6 animate-in slide-in-from-left-8 duration-[2000ms]">
+          <div className={cn(
+            "animate-in fade-in duration-[2000ms]",
+            friends.length > 0 ? "grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8" : "flex flex-col items-center"
+          )}>
+            <div className={cn(
+              "w-full space-y-6 animate-in slide-in-from-left-8 duration-[2000ms]",
+              friends.length > 0 ? "lg:col-span-4" : "lg:max-w-lg"
+            )}>
               <section id="group-members-section" className="bg-card rounded-2xl p-6 shadow-sm border border-border scroll-mt-24 transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-headline font-bold flex items-center gap-2">
@@ -431,283 +437,289 @@ export default function BillSplitter() {
                 )}
               </section>
 
-              <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1500ms] transition-all hover:shadow-md">
-                <h3 className="text-lg font-headline font-bold flex items-center gap-2 mb-4">
-                  <Receipt className="w-5 h-5 text-primary" />
-                  Bill Summary
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground flex items-center gap-1">
-                      <Store className="w-3.5 h-3.5" />
-                      Place
-                    </span>
-                    <Input 
-                      placeholder="Restaurant Name" 
-                      value={restaurantName} 
-                      onChange={e => setRestaurantName(e.target.value)}
-                      className="w-40 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
-                    />
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-muted-foreground">₹</span>
-                      <Input 
-                        type="number" 
-                        value={billMeta.subtotal} 
-                        onChange={e => setBillMeta(prev => ({ ...prev, subtotal: parseFloat(e.target.value) || 0 }))}
-                        className="w-24 h-8 text-right font-bold border-none bg-muted/30 focus-visible:ring-1" 
-                      />
+              {friends.length > 0 && (
+                <>
+                  <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1500ms] transition-all hover:shadow-md">
+                    <h3 className="text-lg font-headline font-bold flex items-center gap-2 mb-4">
+                      <Receipt className="w-5 h-5 text-primary" />
+                      Bill Summary
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Store className="w-3.5 h-3.5" />
+                          Place
+                        </span>
+                        <Input 
+                          placeholder="Restaurant Name" 
+                          value={restaurantName} 
+                          onChange={e => setRestaurantName(e.target.value)}
+                          className="w-40 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
+                        />
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">Subtotal</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground">₹</span>
+                          <Input 
+                            type="number" 
+                            value={billMeta.subtotal} 
+                            onChange={e => setBillMeta(prev => ({ ...prev, subtotal: parseFloat(e.target.value) || 0 }))}
+                            className="w-24 h-8 text-right font-bold border-none bg-muted/30 focus-visible:ring-1" 
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">Tax</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground">₹</span>
+                          <Input 
+                            type="number" 
+                            value={billMeta.tax} 
+                            onChange={e => setBillMeta(prev => ({ ...prev, tax: parseFloat(e.target.value) || 0 }))}
+                            className="w-24 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">Tip</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground">₹</span>
+                          <Input 
+                            type="number" 
+                            value={billMeta.tip} 
+                            onChange={e => setBillMeta(prev => ({ ...prev, tip: parseFloat(e.target.value) || 0 }))}
+                            className="w-24 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
+                          />
+                        </div>
+                      </div>
+                      <div className="pt-3 border-t flex justify-between items-center">
+                        <span className="font-bold text-foreground">Total</span>
+                        <span className="text-sm font-bold text-primary">₹{billTotal.toFixed(2)}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Tax</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-muted-foreground">₹</span>
-                      <Input 
-                        type="number" 
-                        value={billMeta.tax} 
-                        onChange={e => setBillMeta(prev => ({ ...prev, tax: parseFloat(e.target.value) || 0 }))}
-                        className="w-24 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Tip</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-muted-foreground">₹</span>
-                      <Input 
-                        type="number" 
-                        value={billMeta.tip} 
-                        onChange={e => setBillMeta(prev => ({ ...prev, tip: parseFloat(e.target.value) || 0 }))}
-                        className="w-24 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
-                      />
-                    </div>
-                  </div>
-                  <div className="pt-3 border-t flex justify-between items-center">
-                    <span className="font-bold text-foreground">Total</span>
-                    <span className="text-sm font-bold text-primary">₹{billTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-              </section>
+                  </section>
 
-              <div className="space-y-3">
-                <Button 
-                  variant="ghost" 
-                  className="w-full h-11 text-muted-foreground hover:bg-muted transition-all flex items-center justify-center gap-2 rounded-xl"
-                  onClick={() => setShowResetDialog(true)}
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Reset Session
-                </Button>
-              </div>
+                  <div className="space-y-3">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full h-11 text-muted-foreground hover:bg-muted transition-all flex items-center justify-center gap-2 rounded-xl"
+                      onClick={() => setShowResetDialog(true)}
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Reset Session
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
 
-            <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-[2000ms]">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 h-14 bg-card p-1 rounded-2xl shadow-sm border border-border mb-6">
-                  <TabsTrigger value="scan" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white">
-                    <Receipt className="w-4 h-4 mr-2" />
-                    <span className="text-xs md:text-sm">Scan</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="assign" 
-                    disabled={isAssignDisabled}
-                    className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white disabled:opacity-30"
-                  >
-                    <ListTodo className="w-4 h-4 mr-2" />
-                    <span className="text-xs md:text-sm">Assign</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="summary" 
-                    disabled={totalMismatch}
-                    className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white disabled:opacity-30"
-                  >
-                    <PieChart className="w-4 h-4 mr-2" />
-                    <span className="text-xs md:text-sm">Split</span>
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="scan" className="mt-0 focus-visible:outline-none">
-                  <div className="bg-card rounded-2xl p-6 md:p-8 shadow-sm border border-border">
-                    <p className="text-sm text-center text-muted-foreground mb-4 font-medium">
-                      Wrong items or poor scan?
-                    </p>
-                    <BillUploader onDataExtracted={onDataExtracted} />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="assign" className="mt-0 focus-visible:outline-none space-y-6">
-                  <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-[1000ms]">
-                    <Label className="text-xs font-bold uppercase text-muted-foreground mb-4 block tracking-widest">Split Method</Label>
-                    <RadioGroup 
-                      value={splitMode} 
-                      onValueChange={(val: any) => setSplitMode(val)}
-                      className="flex flex-col gap-4"
+            {friends.length > 0 && (
+              <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-[2000ms]">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 h-14 bg-card p-1 rounded-2xl shadow-sm border border-border mb-6">
+                    <TabsTrigger value="scan" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white">
+                      <Receipt className="w-4 h-4 mr-2" />
+                      <span className="text-xs md:text-sm">Scan</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="assign" 
+                      disabled={isAssignDisabled}
+                      className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white disabled:opacity-30"
                     >
-                      <div className="flex items-center space-x-3 py-1">
-                        <RadioGroupItem value="item-wise" id="item-wise" />
-                        <Label htmlFor="item-wise" className="cursor-pointer font-medium flex items-center gap-2">
-                          <ListFilter className="w-4 h-4 text-primary" />
-                          Item Wise
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-3 py-1">
-                        <RadioGroupItem value="equal" id="equal" />
-                        <Label htmlFor="equal" className="cursor-pointer font-medium flex items-center gap-2">
-                          <Scale className="w-4 h-4 text-primary" />
-                          Equal Split
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-3 py-1">
-                        <RadioGroupItem value="percentage" id="percentage" />
-                        <Label htmlFor="percentage" className="cursor-pointer font-medium flex items-center gap-2">
-                          <Percent className="w-4 h-4 text-primary" />
-                          Percentage
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
+                      <ListTodo className="w-4 h-4 mr-2" />
+                      <span className="text-xs md:text-sm">Assign</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="summary" 
+                      disabled={totalMismatch}
+                      className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white disabled:opacity-30"
+                    >
+                      <PieChart className="w-4 h-4 mr-2" />
+                      <span className="text-xs md:text-sm">Split</span>
+                    </TabsTrigger>
+                  </TabsList>
 
-                  {splitMode === 'item-wise' && (
-                    <div className="space-y-6 animate-in fade-in duration-[1000ms]">
-                      <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Items</h2>
-                        <div className="flex gap-2">
-                          {hasChanges && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => setShowRevertDialog(true)} 
-                              className="h-9 text-muted-foreground hover:text-primary rounded-full px-4"
-                            >
-                              <Undo2 className="w-4 h-4 mr-1" />
-                              Revert to Scanned
-                            </Button>
-                          )}
-                          <Button variant="outline" size="sm" onClick={addNewItem} className="h-9 border-primary/50 text-primary hover:bg-primary hover:text-white rounded-full px-4">
-                            <PlusCircle className="w-4 h-4 mr-1" />
-                            Add Item
-                          </Button>
-                        </div>
-                      </div>
-                      <ItemAssigner 
-                        items={items} 
-                        friends={friends} 
-                        assignments={assignments} 
-                        onToggleAssignment={handleToggleAssignment}
-                        onUpdateItem={handleUpdateItem}
-                        onDeleteItem={handleDeleteItem}
-                      />
-                    </div>
-                  )}
-
-                  {splitMode === 'equal' && (
-                    <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-[1000ms]">
-                      <Scale className="w-16 h-16 text-primary mx-auto mb-6 opacity-80" />
-                      <h3 className="text-2xl font-bold mb-3">Equal Split Active</h3>
-                      <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                        Divided equally among your <span className="font-bold text-foreground">{friends.length}</span> group members.
+                  <TabsContent value="scan" className="mt-0 focus-visible:outline-none">
+                    <div className="bg-card rounded-2xl p-6 md:p-8 shadow-sm border border-border">
+                      <p className="text-sm text-center text-muted-foreground mb-4 font-medium">
+                        Wrong items or poor scan?
                       </p>
-                      {friends.length > 0 && (
-                        <div className="mt-8 p-6 bg-primary/5 rounded-2xl inline-block border border-primary/10">
-                          <p className="text-xs uppercase font-bold text-primary/70 tracking-wider mb-2">Per Person</p>
-                          <p className="text-xl font-black text-primary">₹{(billTotal / friends.length).toFixed(2)}</p>
+                      <BillUploader onDataExtracted={onDataExtracted} />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="assign" className="mt-0 focus-visible:outline-none space-y-6">
+                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-[1000ms]">
+                      <Label className="text-xs font-bold uppercase text-muted-foreground mb-4 block tracking-widest">Split Method</Label>
+                      <RadioGroup 
+                        value={splitMode} 
+                        onValueChange={(val: any) => setSplitMode(val)}
+                        className="flex flex-col gap-4"
+                      >
+                        <div className="flex items-center space-x-3 py-1">
+                          <RadioGroupItem value="item-wise" id="item-wise" />
+                          <Label htmlFor="item-wise" className="cursor-pointer font-medium flex items-center gap-2">
+                            <ListFilter className="w-4 h-4 text-primary" />
+                            Item Wise
+                          </Label>
                         </div>
+                        <div className="flex items-center space-x-3 py-1">
+                          <RadioGroupItem value="equal" id="equal" />
+                          <Label htmlFor="equal" className="cursor-pointer font-medium flex items-center gap-2">
+                            <Scale className="w-4 h-4 text-primary" />
+                            Equal Split
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-3 py-1">
+                          <RadioGroupItem value="percentage" id="percentage" />
+                          <Label htmlFor="percentage" className="cursor-pointer font-medium flex items-center gap-2">
+                            <Percent className="w-4 h-4 text-primary" />
+                            Percentage
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    {splitMode === 'item-wise' && (
+                      <div className="space-y-6 animate-in fade-in duration-[1000ms]">
+                        <div className="flex items-center justify-between mb-2">
+                          <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Items</h2>
+                          <div className="flex gap-2">
+                            {hasChanges && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setShowRevertDialog(true)} 
+                                className="h-9 text-muted-foreground hover:text-primary rounded-full px-4"
+                              >
+                                <Undo2 className="w-4 h-4 mr-1" />
+                                Revert to Scanned
+                              </Button>
+                            )}
+                            <Button variant="outline" size="sm" onClick={addNewItem} className="h-9 border-primary/50 text-primary hover:bg-primary hover:text-white rounded-full px-4">
+                              <PlusCircle className="w-4 h-4 mr-1" />
+                              Add Item
+                            </Button>
+                          </div>
+                        </div>
+                        <ItemAssigner 
+                          items={items} 
+                          friends={friends} 
+                          assignments={assignments} 
+                          onToggleAssignment={handleToggleAssignment}
+                          onUpdateItem={handleUpdateItem}
+                          onDeleteItem={handleDeleteItem}
+                        />
+                      </div>
+                    )}
+
+                    {splitMode === 'equal' && (
+                      <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-[1000ms]">
+                        <Scale className="w-16 h-16 text-primary mx-auto mb-6 opacity-80" />
+                        <h3 className="text-2xl font-bold mb-3">Equal Split Active</h3>
+                        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                          Divided equally among your <span className="font-bold text-foreground">{friends.length}</span> group members.
+                        </p>
+                        {friends.length > 0 && (
+                          <div className="mt-8 p-6 bg-primary/5 rounded-2xl inline-block border border-primary/10">
+                            <p className="text-xs uppercase font-bold text-primary/70 tracking-wider mb-2">Per Person</p>
+                            <p className="text-xl font-black text-primary">₹{(billTotal / friends.length).toFixed(2)}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {splitMode === 'percentage' && (
+                      <div className="space-y-6 animate-in fade-in duration-[1000ms]">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Percentages</h2>
+                            {friends.length > 0 && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={resetToEqualPercentages}
+                                className="h-7 text-[10px] uppercase font-bold text-muted-foreground hover:text-primary border-primary/20 rounded-full"
+                              >
+                                <RotateCcw className="w-3 h-3 mr-1" />
+                                Equalize
+                              </Button>
+                            )}
+                          </div>
+                          <div className={cn(
+                            "text-xs font-bold px-4 py-1.5 rounded-full border transition-all duration-500",
+                            Math.abs(100 - totalPercentage) < 0.05 ? "bg-green-100 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-100"
+                          )}>
+                            {Math.abs(100 - totalPercentage) < 0.05 ? "100.00%" : `${(100 - totalPercentage).toFixed(2)}% remaining`}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {friends.map(friend => (
+                            <Card key={friend} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md animate-in fade-in zoom-in-95 duration-700">
+                              <CardContent className="p-5 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                                    <Users className="w-4 h-4" />
+                                  </div>
+                                  <span className="font-bold">{friend}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <PercentageInput 
+                                    value={percentages[friend] || 0}
+                                    onChange={(val) => handlePercentageChange(friend, val)}
+                                  />
+                                  <span className="text-muted-foreground font-bold">%</span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {totalMismatch && (
+                      <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-[1000ms]">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle className="font-bold">
+                          {splitMode === 'percentage' ? `${(100 - totalPercentage).toFixed(2)}% remaining` : "Split incomplete"}
+                        </AlertTitle>
+                        <AlertDescription className="text-xs opacity-90">
+                          {splitMode === 'item-wise' ? (
+                            <span>Please assign all items to members.</span>
+                          ) : splitMode === 'percentage' ? (
+                            <span>Please adjust percentages to reach exactly 100.00%.</span>
+                          ) : "Total mismatch detected."}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    <div className="pt-8 flex justify-end">
+                      {!totalMismatch && (
+                        <Button
+                          size="lg"
+                          onClick={() => setActiveTab('summary')}
+                          className="w-full sm:w-auto px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-lg h-14 rounded-full transition-all hover:scale-105"
+                        >
+                          View Split Summary
+                        </Button>
                       )}
                     </div>
-                  )}
+                  </TabsContent>
 
-                  {splitMode === 'percentage' && (
-                    <div className="space-y-6 animate-in fade-in duration-[1000ms]">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Percentages</h2>
-                          {friends.length > 0 && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={resetToEqualPercentages}
-                              className="h-7 text-[10px] uppercase font-bold text-muted-foreground hover:text-primary border-primary/20 rounded-full"
-                            >
-                              <RotateCcw className="w-3 h-3 mr-1" />
-                              Equalize
-                            </Button>
-                          )}
-                        </div>
-                        <div className={cn(
-                          "text-xs font-bold px-4 py-1.5 rounded-full border transition-all duration-500",
-                          Math.abs(100 - totalPercentage) < 0.05 ? "bg-green-100 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-100"
-                        )}>
-                          {Math.abs(100 - totalPercentage) < 0.05 ? "100.00%" : `${(100 - totalPercentage).toFixed(2)}% remaining`}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {friends.map(friend => (
-                          <Card key={friend} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md animate-in fade-in zoom-in-95 duration-700">
-                            <CardContent className="p-5 flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                                  <Users className="w-4 h-4" />
-                                </div>
-                                <span className="font-bold">{friend}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <PercentageInput 
-                                  value={percentages[friend] || 0}
-                                  onChange={(val) => handlePercentageChange(friend, val)}
-                                />
-                                <span className="text-muted-foreground font-bold">%</span>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {totalMismatch && (
-                    <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-[1000ms]">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle className="font-bold">
-                        {splitMode === 'percentage' ? `${(100 - totalPercentage).toFixed(2)}% remaining` : "Split incomplete"}
-                      </AlertTitle>
-                      <AlertDescription className="text-xs opacity-90">
-                        {splitMode === 'item-wise' ? (
-                          <span>Please assign all items to members.</span>
-                        ) : splitMode === 'percentage' ? (
-                          <span>Please adjust percentages to reach exactly 100.00%.</span>
-                        ) : "Total mismatch detected."}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
-                  <div className="pt-8 flex justify-end">
-                    {!totalMismatch && (
-                      <Button
-                        size="lg"
-                        onClick={() => setActiveTab('summary')}
-                        className="w-full sm:w-auto px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-lg h-14 rounded-full transition-all hover:scale-105 animate-in fade-in"
-                      >
-                        View Split Summary
-                      </Button>
-                    )}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="summary" className="mt-0 focus-visible:outline-none">
-                  <SplitSummary 
-                    splits={splitResults} 
-                    tax={billMeta.tax} 
-                    tip={billMeta.tip} 
-                    total={billTotal} 
-                    restaurantName={restaurantName}
-                    hasError={totalMismatch}
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
+                  <TabsContent value="summary" className="mt-0 focus-visible:outline-none">
+                    <SplitSummary 
+                      splits={splitResults} 
+                      tax={billMeta.tax} 
+                      tip={billMeta.tip} 
+                      total={billTotal} 
+                      restaurantName={restaurantName}
+                      hasError={totalMismatch}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            )}
           </div>
         )}
       </div>
