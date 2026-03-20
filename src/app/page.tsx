@@ -38,6 +38,7 @@ export default function BillSplitter() {
   const [mounted, setMounted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showRevertDialog, setShowRevertDialog] = useState(false);
   
   // Animation stages: 0 (Logo appearing), 1 (Quote fading in), 2 (Move to top)
   const [animationStage, setAnimationStage] = useState(0);
@@ -141,10 +142,13 @@ export default function BillSplitter() {
     }
   };
 
-  const restoreOriginalItems = () => {
-    if (confirm("Restore all items to the original scanned state? Any manually added items will be removed.")) {
-      setItems([...originalItems]);
-    }
+  const handleRevertConfirm = () => {
+    setItems([...originalItems]);
+    setShowRevertDialog(false);
+    toast({
+      title: "Changes Reverted",
+      description: "The item list has been restored to the original scanned version.",
+    });
   };
 
   const handleToggleAssignment = (itemId: string, friend: string) => {
@@ -341,6 +345,26 @@ export default function BillSplitter() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Reset Session
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showRevertDialog} onOpenChange={setShowRevertDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to revert?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will discard all manual changes to the item list and restore it to the state it was in after the last successful scan. Any manually added items will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRevertConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Revert Changes
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -561,11 +585,11 @@ export default function BillSplitter() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              onClick={restoreOriginalItems} 
+                              onClick={() => setShowRevertDialog(true)} 
                               className="h-9 text-muted-foreground hover:text-primary rounded-full px-4"
                             >
                               <Undo2 className="w-4 h-4 mr-1" />
-                              Restore Scanned
+                              Revert to Scanned
                             </Button>
                           )}
                           <Button variant="outline" size="sm" onClick={addNewItem} className="h-9 border-primary/50 text-primary hover:bg-primary hover:text-white rounded-full px-4">
