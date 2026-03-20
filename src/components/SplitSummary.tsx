@@ -23,7 +23,7 @@ interface SplitSummaryProps {
 
 export default function SplitSummary({ splits, tax, tip, total, restaurantName, hasError }: SplitSummaryProps) {
   const generateShareMessage = (res: SplitResult) => {
-    const itemsText = res.items.map(it => `• ${it.name}: ₹${it.cost.toFixed(2)}`).join('\n');
+    const itemsText = res.items.map(it => `• ${it.name}: Rs.${it.cost.toFixed(2)}`).join('\n');
     const greeting = `Hi ${res.friend}!`;
     const intro = restaurantName 
       ? `Here is your split from ${restaurantName} via BillSplitter:`
@@ -34,11 +34,11 @@ ${intro}
 
 ${itemsText}
 
-Subtotal: ₹${res.subtotal.toFixed(2)}
-Tax Share: ₹${res.taxShare.toFixed(2)}
-Tip Share: ₹${res.tipShare.toFixed(2)}
+Subtotal: Rs.${res.subtotal.toFixed(2)}
+Tax Share: Rs.${res.taxShare.toFixed(2)}
+Tip Share: Rs.${res.tipShare.toFixed(2)}
 -------------------
-Total Owed: ₹${res.total.toFixed(2)}
+Total Owed: Rs.${res.total.toFixed(2)}
 
 Thanks!`;
   };
@@ -84,7 +84,7 @@ Thanks!`;
     };
 
     // --- Logo ---
-    const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgcng9IjYiIGZpbGw9IiMwMEEzRkYiLz4KPHBhdGggZD0iTTguNSA3LjVIMTUuNVYxNS41QzE1LjUgMTYuMDUyMyAxNS4wNTIzIDE2LjUgMTQuNSAxNi41SDkuNUM4Ljk0NzcyIDE2LjUgOC41IDE2LjA1MjMgOC41IDE1LjVBNy41WiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPHBhdGggZD0iTTcuNSAxNi41TDguNSAxNy41TDkuNSAxNi41TDEwLjUgMTcuNUwxMS41IDE2LjVMMTIuNSAxNy41TDEzLjUgMTYuNUwxNC41IDE3LjVMMTUuNSAxNi41TDE2LjUgMTcuNSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTMuMjUgMTEuMjVDMTMuMjUgMTAuNTU5NiAxMi42OTA0IDEwIDEyIDEwQzExLjMwOTYgMTAgMTAuNzUgMTAuNTU5NiAxMC43NSAxMS4yNUMxMC43NSAxMS45NDA0IDExLjMwOTYgMTIuNSAxMiAxMi41SDEzLjI1TTMuMjUgMTEuMjVWMTNDMTMuMjUgMTMuNjkwNCAxMi42OTA0IDE0LjI1IDEyIDE0LjI1QzExLjMwOTYgMTQuMjUgMTAuNzUgMTMuNjkwNCAxMC43NSAxMyIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTIgOVYxNSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4=';
+    const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iNiIgZmlsbD0iIzAwQTNGRiIvPjxwYXRoIGQ9Ik03IDVIMTdDMTcuNTUyMyA1IDE4IDUuNDQ3NzIgMTggNlYxOUwxNi41IDE4LjI1TDE1IDE5TDEzLjUgMTguMjVMMTIgMTlMMTAuNSAxOC4yNUw5IDE5TDcuNSAxOC4yNUw2IDE5VjZDNiA1LjQ0NzcyIDYuNDQ3NzIgNSA3IDVaIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==';
     
     let logoPngDataUrl: string;
     try {
@@ -358,7 +358,7 @@ Thanks!`;
                 {res.items.map((item, idx) => (
                   <div key={idx} className="flex justify-between text-sm items-start">
                     <span className="text-muted-foreground/80 font-medium max-w-[70%] break-words">{item.name}</span>
-                    <span className="font-bold shrink-0">₹{item.cost.toFixed(2)}</span>
+                    <span className="font-bold shrink-0">Rs.{item.cost.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -366,21 +366,21 @@ Thanks!`;
               <div className="space-y-1.5 text-xs font-medium text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="text-foreground">₹{res.subtotal.toFixed(2)}</span>
+                  <span className="text-foreground">Rs.{res.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax Share</span>
-                  <span className="text-foreground">₹{res.taxShare.toFixed(2)}</span>
+                  <span className="text-foreground">Rs.{res.taxShare.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tip Share</span>
-                  <span className="text-foreground">₹{res.tipShare.toFixed(2)}</span>
+                  <span className="text-foreground">Rs.{res.tipShare.toFixed(2)}</span>
                 </div>
               </div>
               <div className="pt-2">
                 <div className="bg-primary/5 rounded-xl p-3 flex justify-between items-center border border-primary/10">
                   <span className="font-bold text-primary/80 text-xs uppercase tracking-wider">Owes</span>
-                  <span className="text-sm font-bold text-primary">₹{res.total.toFixed(2)}</span>
+                  <span className="text-sm font-bold text-primary">Rs.{res.total.toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>
