@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -153,12 +154,9 @@ export default function FriendManager({ friends, onAddFriend, onRemoveFriend }: 
             </button>
           </Badge>
         ))}
-        {friends.length === 0 && (
-          <div className="text-center w-full py-6 bg-muted/20 rounded-xl border border-dashed border-border">
-            <p className="text-sm text-muted-foreground">Add people to start splitting!</p>
-          </div>
-        )}
       </div>
     </div>
   );
 }
+
+    

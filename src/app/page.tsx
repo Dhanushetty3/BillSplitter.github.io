@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Receipt, Users, ListTodo, PieChart, RotateCcw, PlusCircle, AlertCircle, Sun, Moon, Store, Percent, Scale, ListFilter, PlayCircle, CheckCircle2, Undo2, ArrowDownCircle } from 'lucide-react';
+import { Receipt, Users, ListTodo, PieChart, RotateCcw, PlusCircle, AlertCircle, Sun, Moon, Store, Percent, Scale, ListFilter, PlayCircle, CheckCircle2, Undo2, ArrowUpCircle } from 'lucide-react';
 import BillUploader from '@/components/BillUploader';
 import FriendManager from '@/components/FriendManager';
 import ItemAssigner from '@/components/ItemAssigner';
@@ -414,7 +414,7 @@ export default function BillSplitter() {
           )}>
             <div className={cn(
               "w-full space-y-6 animate-in slide-in-from-left-8 duration-[2000ms]",
-              friends.length > 0 ? "lg:col-span-4" : "lg:max-w-lg"
+              isBillUploaded ? "lg:max-w-lg" : ""
             )}>
               <section id="group-members-section" className="bg-card rounded-2xl p-6 shadow-sm border border-border scroll-mt-24 transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
@@ -422,22 +422,22 @@ export default function BillSplitter() {
                     <Users className="w-5 h-5 text-primary" />
                     Group Members
                   </h3>
-                  <span className="text-xs bg-muted px-2 py-1 rounded-full font-medium">{friends.length}</span>
+                  {friends.length > 0 && <span className="text-xs bg-muted px-2 py-1 rounded-full font-medium">{friends.length}</span>}
                 </div>
                 <FriendManager 
                   friends={friends} 
                   onAddFriend={name => setFriends(prev => [...prev, name])} 
                   onRemoveFriend={handleRemoveFriend}
                 />
-                {friends.length === 0 && (
+                {friends.length === 0 && isBillUploaded && (
                   <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-dashed border-primary/20 text-center animate-bounce duration-[2000ms] transition-all">
-                    <ArrowDownCircle className="w-6 h-6 text-primary mx-auto mb-2 opacity-50" />
+                    <ArrowUpCircle className="w-6 h-6 text-primary mx-auto mb-2 opacity-50" />
                     <p className="text-xs text-primary font-bold">Add friends here to start splitting!</p>
                   </div>
                 )}
               </section>
 
-              {friends.length > 0 && (
+              {friends.length > 0 && isBillUploaded && (
                 <>
                   <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1500ms] transition-all hover:shadow-md">
                     <h3 className="text-lg font-headline font-bold flex items-center gap-2 mb-4">
@@ -514,7 +514,7 @@ export default function BillSplitter() {
               )}
             </div>
 
-            {friends.length > 0 && (
+            {friends.length > 0 && isBillUploaded && (
               <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-[2000ms]">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 h-14 bg-card p-1 rounded-2xl shadow-sm border border-border mb-6">
@@ -760,3 +760,5 @@ function PercentageInput({ value, onChange }: { value: number; onChange: (val: n
     />
   );
 }
+
+    
