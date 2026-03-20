@@ -45,7 +45,8 @@ async function resizeImage(file: File): Promise<string> {
           return reject(new Error('Could not get canvas context'));
         }
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL(file.type));
+        // Force JPEG compression with 80% quality to ensure the file size is small.
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
       };
       img.onerror = (err) => reject(err);
       img.src = event.target.result as string;

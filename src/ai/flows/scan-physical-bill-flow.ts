@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for scanning a physical bill
@@ -31,10 +32,10 @@ const ScanPhysicalBillOutputSchema = z.object({
       amount: z.number().describe('Amount of the item.'),
     })
   ).describe('A list of individual items from the bill with their descriptions and amounts.'),
-  subtotal: z.number().describe('The subtotal of all items before tax and tip.'),
-  tax: z.number().describe('The tax amount applied to the bill.'),
-  tip: z.number().optional().describe('The tip amount added to the bill, if specified. Optional if not present.'),
-  total: z.number().describe('The total amount of the bill, including subtotal, tax, and tip.'),
+  subtotal: z.number().optional().default(0).describe('The subtotal of all items before tax and tip.'),
+  tax: z.number().optional().default(0).describe('The tax amount applied to the bill.'),
+  tip: z.number().optional().default(0).describe('The tip amount added to the bill, if specified. Optional if not present.'),
+  total: z.number().optional().default(0).describe('The total amount of the bill, including subtotal, tax, and tip.'),
 }).describe('Extracted details from a scanned physical bill.');
 export type ScanPhysicalBillOutput = z.infer<typeof ScanPhysicalBillOutputSchema>;
 
@@ -46,15 +47,15 @@ const prompt = ai.definePrompt({
   name: 'scanPhysicalBillPrompt',
   input: {schema: ScanPhysicalBillInputSchema},
   output: {schema: ScanPhysicalBillOutputSchema},
-  prompt: `You are an expert at extracting structured information from images of physical receipts. Your task is to analyze the provided image and extract bill details.
+  prompt: `You are an expert at extracting structured information from images of physical receipts. Your task is to analyze the provided image and extract bill details according to the specified JSON schema.
 
-- Identify the establishment's name ('placeOfTransaction').
-- Find the transaction date ('date') in YYYY-MM-DD format. Omit if unclear.
-- List all individual 'items', each with a 'description' and 'amount'.
+- Identify the establishment's name ('placeOfTransaction'). If it's not clear, use "Unknown".
+- Find the transaction date ('date') in YYYY-MM-DD format. Omit the field if it's not visible.
+- List all individual 'items', each with a 'description' and 'amount'. If no items are discernible, return an empty array.
 - Extract the 'subtotal', 'tax', and 'total' amounts.
 - Extract the 'tip' amount if specified.
 
-IMPORTANT: If any numeric value (subtotal, tax, tip, total, or item amounts) is not found or unclear, use 0 as the default.
+CRITICAL: If any numeric value (subtotal, tax, tip, total, or item amounts) is not found or is unclear, you MUST provide a value of 0 for that field. Do not omit these numeric fields.
 
 Image of the bill: {{media url=photoDataUri}}`,
 });
