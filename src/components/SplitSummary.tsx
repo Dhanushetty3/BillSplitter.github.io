@@ -58,11 +58,10 @@ Thanks!`;
     const doc = new jsPDF();
     const dateStr = new Date().toLocaleDateString();
 
-    // --- Logo ---
-    const logoPngDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAARwSURBVHhe7Z1/aFxVFMd/d1fRQuwFBbEJEUEKxYpgIyIYEbQLK42g2GghGIqCRkoLK4qNFAsFRbCIIiiKiCAiUKwEEUEUBB/EUCD4Ibu7+33OnJnL3Pvem7v3vTf3I/eDx31z733u+c255M65p0QikUgkEolEIpFIJBKJRCKRSCQSiUQikUikq0hYq52LpFoN2vV+VfVp9er5Xg207aCbrL2224dF53q9H6t+3aC/rD5v425vB6d6eL+8d8LKhKqS2qgH6zJqj6tX17tV1UvVj6vHq47W3N/6jSotlE+qT2pLajO1H5rW0d9d300fUf/c/z8aU4vD2R2qV2mNqFfVB/Rf5qBq998/vX+y7e9qY0b81hP99y/fH/cZl3c/s/6pD+2IapJNJV0/6V1vE/Wb2j9Vf11T/fGqg4v3/Y0q/u2Rj2h+gGg/n1Gv68R9W39p7qq/rG7338/5uMub9Vd1v/6G9rGqKbrK2tr6gO092m9qg6t/qf4pP+9GqQe9/uR1uY7H5P12vVNfdY0+b81jL+V1v7t2i9r/+6mN5V0x1/39m3c5+3/XvW8r0k+U9N/+6B+rY+pQ+qI6j9rNfUt1QW0V9W5aI5f0qL6+3rC2yK2X+qN7tPqT1+9j8U66H1o76S9tT3d6H0x/qH7w3M059V/11/R+1H+pPqve+o7+9h+q5+g+0/5mC6J2qu+uNf7qMeq/quvpG+lVNVz1Y/+z/X0x/qf7uW7r0U/Q2/vM1V9Uv1T/VD9dPa2tH5q+WlV4mqa7q335+26/n3pA7XF2mC6t/55/R/1v+g+z3p72vV95E4uM/W/+5h3f05GkL7Nq7D+3Xb+qT601/3k3h4V0f/0R/Xw3s3Wnvr1VdJutxW1J3V6/9b6mDtlxXVx/7339J+Xf29X+X763L/1sPVn/0vVFVH62c1Gv16z/371XfV3/2v1aNrf+8ncdjf+b+b9d/qOeqb6vD+n9+y6lW1t/Tf/a/P47E+/Lfrf2o3/e+1b31k37+Ld8f99W3da896w7pA2uX/Tf9t+2y/33a6+o7+i86pQ/t19+2jW87q0/r3v1/1V9rN/9/n6f+x+v1OqSbrB71uN5n3+tHqVbVV2sP6a/2r76n27D/1U/V+v63/pbfU39bd1WvW5P6gH9+hH9/T+/V9r/62+q5+rn6wLqlOqn/3/X+99kP/u1f+x+uP/2P1b9f//r/tbf2pX+X+q9b2/+21f+3pL71d9H/tqR+1s1qW2pP6xLqg+of/Xf/d630v1X/t6V+t6RerV/tL9Vf6/H1f39f/y3X+6/879D/+y86pUer/3fUo9Vv15SfrWn/6x/8v9cjf1B9vV/tv5d/V7/tL/+Xv/53/7d+l2vV730x//tP/7s1H5FIJBKJRCKRSKSU8h+480B22u11wwAAAABJRU5ErkJggg==';
+    const logoPngDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAA5VJREFUeF7tnaFuE0EQhb+LCCGaE/EongiQhARxQ4QERKwcgSQLIiGRIBFEEiQSSBB8hAGf4AdE9I/2mJ2Zndnpma/p2e18lFQrVdXbVbfWdDrxZDaykY1sZCMb2chGNrKRjWz8PzYh27qI6N5782Fm7/0Zt4f2yT1E9N79Gbf3p3tINsP79L5u3Cftk/sEAb8Pdt4FXuD3dE++d3f3fXo33sAfeAMv4L1xH2mfrD9g4w38w8bb2D/Y2Dftk/uEQJgP9gvyGvLhR3x7F9t/z+tP7r8f/8gHjG+sP9h42z65hwhpPzj/Dxv/jD/wBzbeZp/chwQ0f59cE5f0Tzbe0f5h/WHDn7RP7jEC+s/sPYHvtD/wB7+yT+5hAtK/sHGC3k9sP2w8bPvkXiIg+wdtP+g/bHxsn9y/Cch/YP8x/sHGKfrkXicg+4eNv28g/2jjg/3bPrkHCGn/tPGB/sPGFPrk3idA+79t/L6P9r+yT+5DAgK/d/9g/7Bxf7ZP7kMCmr9PnknuIQLa32S+0z65RwhofzLfYp/c2wSE/pP7SPrkHiMg/Ml9p31yTxGQ/mT+yT65hwhIf/L+aZ/c5wSE/pP7s31yDxPQ/mS+0j65RwhofzLfYJ/chwQk/5nvaZ/cZwSE/mS+wT65RwhI/jLfafvkPiQg+Z/s+6R9ch8RUH9y322f3OMEtD/Zf7ZPrhEC2p/sT9gn9wEB6U/2a+yT+4SA9Cf7rfbJPUZA+pP93fZJPUZA+5P91fbJPUpA+pP9rPa5fU5A+pP9PPa5fUZg+5P9HPY5fUdg+5P9bPY5/W/e7v/H+/T+5N/y/f1/vE/uL3m//+v3/f5un9y/7fVfvy/0z/v0/ubf9f7v3/f7x/vk/uTf9/7v3/f7t/vk/uS/7/3fv++X98n9wH/f+3+iL/fJ/bO8/3/f9/v9+31yX/P9/n/f9/t8fZ/cv3f5/1+iL/XJfVne/j/f9/t8fZ/cN/3+f7/v9/l8fZ/c3/f6/3/f7/P1fXJ/0et/f7fP1/fJfc33+//rfp+v75P7i/5+H9/3+/x8fZ/cl+X9/j/fL/fJ/bO8/n+/75f75P5YXv8/35f3yX3B9/n+fL++T+7P5v3/fF/uE3v5/H2/3Cfvq/Xl+nLfdJ+Xb993Cfvq/Xl+nLfdJ+Xb993Cfvq/Xl+nLfdJ+Xb993Cfvq/Xl+nLfdJ+Xb993Cfvq/Xl+nLfdJ+Xb993Cfvq/Xl+nLfdJ+Xb993Cfvq/Xl+nLfdJ+Xb993Cfvq/Xl+nLfdJ+Xb993Cfvq/Xl+vLf1xGNrKRjWxkIxvZyEY2spGNbHwHvwFFJmS/sC2wAAAAAElFTkSuQmCC';
 
     // --- Theme and Config ---
-    const primaryColor = "#00A3FF"; // Matching the logo's blue
+    const primaryColor = "#00A3FF";
     const textColor = "#1F2937"; // gray-800
     const mutedColor = "#6B7280"; // gray-500
     const pageMargin = 20;
@@ -81,13 +80,11 @@ Thanks!`;
         
         const startX = pageMargin + (logoPngDataUrl ? 14 : 0);
         
-        // Draw "Bill" in black
         doc.setTextColor(textColor);
         doc.text("Bill", startX, 25);
         
         const billWidth = doc.getTextWidth("Bill");
         
-        // Draw "Splitter" in blue
         doc.setTextColor(primaryColor);
         doc.text("Splitter", startX + billWidth, 25);
 
@@ -199,7 +196,7 @@ Thanks!`;
         }
 
         // Calculation summary
-        y = Math.max(y, 100); // Ensure summary starts at a consistent position if item list is short
+        y = Math.max(y, 100); 
         y += 15;
 
         const summaryX = pageWidth - pageMargin - 50;
@@ -236,7 +233,6 @@ Thanks!`;
     });
 
 
-    // --- Save the PDF ---
     const filename = restaurantName
       ? `BillSplitter_${restaurantName.replace(/\s+/g, '_')}_Report.pdf`
       : "BillSplitter_Split_Report.pdf";
