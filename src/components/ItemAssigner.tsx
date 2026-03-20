@@ -32,7 +32,7 @@ export default function ItemAssigner({
         const itemAssignments = assignments[item.id] || [];
         return (
           <Card key={item.id} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="p-4 space-y-4">
                 <div className="flex justify-between items-start">
                     <Input
                     value={item.name}
