@@ -51,7 +51,7 @@ export default function ItemAssigner({
                 </div>
                 
 
-                <div className="flex justify-between items-end gap-4 mt-2">
+                <div className="flex justify-between items-end gap-4">
                     <div className="flex items-end gap-2">
                         <div className="grid gap-1.5">
                             <Label htmlFor={`qty-${item.id}`} className="text-xs font-medium">Qty</Label>
