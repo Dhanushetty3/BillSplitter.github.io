@@ -15,6 +15,10 @@ import {
   AddItemsWithNaturalLanguageInput,
   AddItemsWithNaturalLanguageOutput
 } from '@/ai/flows/add-items-with-natural-language';
+import {
+  generateDemoBill as generateDemoBillFlow,
+  GenerateDemoBillOutput,
+} from '@/ai/flows/generate-demo-bill-flow';
 
 type ActionResult<T> = {
   success: true;
@@ -23,6 +27,8 @@ type ActionResult<T> = {
   success: false;
   error: string;
 };
+
+export type DemoBillData = GenerateDemoBillOutput & { isDemo: true };
 
 export async function analyzeBillImage(
   dataUri: string
@@ -34,7 +40,13 @@ export async function analyzeBillImage(
   } catch (e) {
     const error = e instanceof Error ? e : new Error('Unknown error');
     console.error('Error analyzing bill image:', error.message);
-    return { success: false, error: error.message || 'Failed to analyze the bill image. Please try again.' };
+    let userMessage = error.message || 'Failed to analyze the bill image. Please try again.';
+    if (error.message?.includes('API key')) {
+      userMessage = 'The Google AI API key is missing. Please create one and add it to your .env file as `GEMINI_API_KEY=YOUR_API_KEY`.';
+    } else if (error.message?.includes('503')) {
+      userMessage = 'The AI service is currently very busy. Please wait a moment and try again.';
+    }
+    return { success: false, error: userMessage };
   }
 }
 
@@ -70,5 +82,16 @@ export async function processNaturalLanguageItems(
     const error = e instanceof Error ? e : new Error('Unknown error');
     console.error('Error processing natural language items:', error.message);
     return { success: false, error: 'Failed to process the items. Please check your input.' };
+  }
+}
+
+export async function generateDemoBill(): Promise<ActionResult<DemoBillData>> {
+  try {
+    const result = await generateDemoBillFlow();
+    return { success: true, data: { ...result, isDemo: true } };
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error('Unknown error');
+    console.error('Error generating demo bill:', error.message);
+    return { success: false, error: 'Failed to generate demo data. Please try again.' };
   }
 }

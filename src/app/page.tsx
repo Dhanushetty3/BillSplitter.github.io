@@ -19,6 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import type { DemoBillData } from '@/app/actions';
 
 export default function BillSplitter() {
   const { toast } = useToast();
@@ -102,7 +103,7 @@ export default function BillSplitter() {
 
   const billTotal = useMemo(() => billMeta.subtotal + billMeta.tax + billMeta.tip, [billMeta]);
 
-  const onDataExtracted = (data: ExtractBillItemsOutput) => {
+  const onDataExtracted = (data: ExtractBillItemsOutput | DemoBillData) => {
     const formattedItems: BillItem[] = data.items.map((it, idx) => ({
       id: `item-${idx}-${Date.now()}`,
       name: it.name,
@@ -118,6 +119,10 @@ export default function BillSplitter() {
       tip: data.tip || 0,
       subtotal: data.subtotal > 0 ? data.subtotal : formattedItems.reduce((sum, it) => sum + it.lineTotal, 0)
     });
+
+    if ('isDemo' in data && data.isDemo) {
+      setFriends(data.participants);
+    }
 
     setShowSuccessModal(true);
   };

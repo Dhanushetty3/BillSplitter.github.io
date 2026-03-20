@@ -1,17 +1,20 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Upload, Loader2, FileText, Camera } from 'lucide-react';
+import { Upload, Loader2, FileText, Camera, PlayCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { extractBillItems, ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
+import { analyzeBillImage, generateDemoBill } from '@/app/actions';
+import type { DemoBillData } from '@/app/actions';
+import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 import { useToast } from '@/hooks/use-toast';
 
 interface BillUploaderProps {
-  onDataExtracted: (data: ExtractBillItemsOutput) => void;
+  onDataExtracted: (data: ExtractBillItemsOutput | DemoBillData) => void;
 }
 
 export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const { toast } = useToast();
 
   const compressAndResizeImage = (dataUrl: string): Promise<string> => {
@@ -52,8 +55,16 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
     setLoading(true);
     try {
       const compressedBase64 = await compressAndResizeImage(dataUrl);
-      const result = await extractBillItems({ photoDataUri: compressedBase64 });
-      onDataExtracted(result);
+      const result = await analyzeBillImage(compressedBase64);
+      if (result.success) {
+        onDataExtracted(result.data);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Extraction Failed",
+          description: result.error,
+        });
+      }
     } catch (error: any) {
       console.error('Extraction error:', error);
       toast({
@@ -78,6 +89,31 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
     }
   };
 
+  const handleDemoClick = async () => {
+    setDemoLoading(true);
+    try {
+        const result = await generateDemoBill();
+        if (result.success) {
+            onDataExtracted(result.data);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Demo Failed",
+                description: result.error,
+            });
+        }
+    } catch (error: any) {
+        console.error('Demo data error:', error);
+        toast({
+            variant: "destructive",
+            title: "Demo Failed",
+            description: error.message || "Could not generate demo data.",
+        });
+    } finally {
+        setDemoLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary/30 rounded-xl bg-card transition-all hover:border-primary/60">
       <div className="relative mb-4">
@@ -96,7 +132,7 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
       
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
         <Button 
-          disabled={loading}
+          disabled={loading || demoLoading}
           onClick={() => document.getElementById('camera-capture')?.click()}
           className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold h-11"
         >
@@ -106,7 +142,7 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
         
         <Button 
           variant="outline"
-          disabled={loading}
+          disabled={loading || demoLoading}
           onClick={() => document.getElementById('bill-upload')?.click()}
           className="flex-1 border-primary/30 text-primary hover:bg-primary/5 h-11"
         >
@@ -133,12 +169,24 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
         />
       </div>
       
-      {loading && (
+      {(loading || demoLoading) && (
         <div className="mt-6 flex items-center gap-3 text-primary animate-pulse">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <p className="text-sm font-bold">...Analyzing your bill...</p>
+          <p className="text-sm font-bold">{loading ? "...Analyzing your bill..." : "...Generating demo..."}</p>
         </div>
       )}
+
+      <div className="mt-6 w-full max-w-xs">
+        <Button
+            variant="link"
+            disabled={loading || demoLoading}
+            onClick={handleDemoClick}
+            className="w-full text-primary/80 hover:text-primary"
+        >
+            <PlayCircle className="w-4 h-4 mr-2" />
+            ... or try a demo
+        </Button>
+      </div>
     </div>
   );
 }
