@@ -43,7 +43,7 @@ export default function BillSplitter() {
 
   const isBillUploaded = useMemo(() => items.length > 0 || billMeta.subtotal > 0, [items.length, billMeta.subtotal]);
   const showFullLayout = isBillUploaded && friends.length > 0;
-  const isCenteredLayout = !showFullLayout;
+  const isCenteredLayout = !isBillUploaded || (isBillUploaded && friends.length === 0);
 
   useEffect(() => {
     setMounted(true);
@@ -63,7 +63,7 @@ export default function BillSplitter() {
         clearTimeout(timer2);
       };
     }
-  }, [animationStage]);
+  }, []);
 
   const resetToEqualPercentages = () => {
     if (friends.length > 0) {
