@@ -1,180 +1,144 @@
+"use client";
 
-'use client';
-
-import React, { useState, useCallback, useRef } from 'react';
-import { Camera, Upload, Loader2, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Upload, Loader2, FileText, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { extractBillItems, ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 import { useToast } from '@/hooks/use-toast';
-import { analyzeBillImage } from '@/app/actions';
-import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 
 interface BillUploaderProps {
   onDataExtracted: (data: ExtractBillItemsOutput) => void;
 }
 
-const MAX_IMAGE_SIZE = 1024; // pixels
+export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-async function resizeImage(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (!event.target?.result) {
-        return reject(new Error('Failed to read file.'));
-      }
+  const compressAndResizeImage = (dataUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
+      img.src = dataUrl;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        let { width, height } = img;
+        const MAX_SIZE = 1600;
+        let width = img.width;
+        let height = img.height;
 
         if (width > height) {
-          if (width > MAX_IMAGE_SIZE) {
-            height = Math.round((height * MAX_IMAGE_SIZE) / width);
-            width = MAX_IMAGE_SIZE;
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
           }
         } else {
-          if (height > MAX_IMAGE_SIZE) {
-            width = Math.round((width * MAX_IMAGE_SIZE) / height);
-            height = MAX_IMAGE_SIZE;
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
           }
         }
 
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          return reject(new Error('Could not get canvas context'));
-        }
+        if (!ctx) return reject(new Error('Canvas context not available'));
+        
         ctx.drawImage(img, 0, 0, width, height);
-        // Force JPEG compression with 80% quality to ensure the file size is small.
         resolve(canvas.toDataURL('image/jpeg', 0.8));
       };
-      img.onerror = (err) => reject(err);
-      img.src = event.target.result as string;
-    };
-    reader.onerror = (err) => reject(err);
-    reader.readAsDataURL(file);
-  });
-}
+      img.onerror = () => reject(new Error('Failed to load image'));
+    });
+  };
 
-
-export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
-  const { toast } = useToast();
-  const [isScanning, setIsScanning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = useCallback(async (file: File | null) => {
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file.');
-      toast({
-        variant: 'destructive',
-        title: 'Invalid File Type',
-        description: 'Please upload an image file (e.g., JPG, PNG).',
-      });
-      return;
-    }
-
-    setIsScanning(true);
-    setError(null);
-
+  const processImage = async (dataUrl: string) => {
+    setLoading(true);
     try {
-      const resizedDataUri = await resizeImage(file);
-      const result = await analyzeBillImage(resizedDataUri);
-
-      if (result.success) {
-        onDataExtracted(result.data);
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error('An unknown error occurred');
-      console.error(err);
-      const errorMessage = err.message || 'Scan failed. Please try again with a clearer image.';
-      setError(errorMessage);
+      const compressedBase64 = await compressAndResizeImage(dataUrl);
+      const result = await extractBillItems({ photoDataUri: compressedBase64 });
+      onDataExtracted(result);
+    } catch (error: any) {
+      console.error('Extraction error:', error);
       toast({
-        variant: 'destructive',
-        title: 'Scan Failed',
-        description: errorMessage,
+        variant: "destructive",
+        title: "Extraction Failed",
+        description: error.message || "Failed to extract items from the bill.",
       });
     } finally {
-      setIsScanning(false);
-    }
-  }, [onDataExtracted, toast]);
-
-  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleFile(event.target.files?.[0] || null);
-    if(event.target) {
-      event.target.value = "";
+      setLoading(false);
     }
   };
 
-  const handleButtonClick = (capture: 'environment' | 'user' | undefined) => {
-    if (fileInputRef.current) {
-        if (capture) {
-            fileInputRef.current.setAttribute('capture', capture);
-        } else {
-            fileInputRef.current.removeAttribute('capture');
-        }
-        fileInputRef.current.click();
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        processImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(e.target.files[0]);
+      // Reset input value so same file can be selected again if needed
+      e.target.value = '';
     }
   };
 
   return (
-    <div className="space-y-6 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-foreground">Scan Your Bill</h2>
-        <p className="text-muted-foreground md:text-lg">
-            Use your camera or upload a photo to extract items automatically.
-        </p>
-
-        <div className="relative flex flex-col items-center justify-center gap-4 pt-4">
-            <input
-                type="file"
-                accept="image/*"
-                onChange={onFileChange}
-                ref={fileInputRef}
-                className="hidden"
-                disabled={isScanning}
-            />
-
-            <Button
-                onClick={() => handleButtonClick('environment')}
-                disabled={isScanning}
-                className="w-full max-w-sm h-16 rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-lg hover:bg-primary/90 transition-all transform hover:scale-105"
-            >
-                {isScanning ? (
-                    <>
-                        <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                        Scanning...
-                    </>
-                ) : (
-                    <>
-                        <Camera className="mr-2 h-6 w-6" />
-                        Scan with Camera
-                    </>
-                )}
-            </Button>
-            
-            <div className="text-sm text-muted-foreground">or</div>
-            
-            <Button
-                variant="outline"
-                onClick={() => handleButtonClick(undefined)}
-                disabled={isScanning}
-                className="w-full max-w-sm h-12 rounded-full border-border font-semibold"
-            >
-                <Upload className="mr-2 h-5 w-5" />
-                Upload Photo
-            </Button>
+    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary/30 rounded-xl bg-card transition-all hover:border-primary/60">
+      <div className="relative mb-4">
+        <div className="bg-primary/10 p-4 rounded-full">
+          <FileText className="w-12 h-12 text-primary/60" />
         </div>
+        <div className="absolute -bottom-1 -right-1 bg-primary p-2 rounded-lg text-white shadow-lg">
+          <Camera className="w-4 h-4" />
+        </div>
+      </div>
 
-        {error && (
-            <div className="mt-4 text-center p-3 bg-destructive/10 text-destructive text-sm rounded-lg flex items-center justify-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                <span>{error}</span>
-            </div>
-        )}
+      <h2 className="text-xl font-headline font-semibold mb-2">Scan Your Bill</h2>
+      <p className="text-muted-foreground text-center mb-6 max-w-xs text-sm">
+        Use your camera or upload a photo to extract items automatically.
+      </p>
+      
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+        <Button 
+          disabled={loading}
+          onClick={() => document.getElementById('camera-capture')?.click()}
+          className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold h-11"
+        >
+          <Camera className="w-4 h-4 mr-2" />
+          Take Photo
+        </Button>
+        
+        <Button 
+          variant="outline"
+          disabled={loading}
+          onClick={() => document.getElementById('bill-upload')?.click()}
+          className="flex-1 border-primary/30 text-primary hover:bg-primary/5 h-11"
+        >
+          <Upload className="w-4 h-4 mr-2" />
+          Upload
+        </Button>
+        
+        {/* Hidden inputs for native handlers */}
+        <input 
+          id="camera-capture" 
+          type="file" 
+          accept="image/*" 
+          capture="environment" 
+          className="hidden" 
+          onChange={handleFileChange} 
+        />
+        
+        <input 
+          id="bill-upload" 
+          type="file" 
+          accept="image/*" 
+          className="hidden" 
+          onChange={handleFileChange} 
+        />
+      </div>
+      
+      {loading && (
+        <div className="mt-6 flex items-center gap-3 text-primary animate-pulse">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <p className="text-sm font-bold">...Analyzing your bill...</p>
+        </div>
+      )}
     </div>
   );
 }
