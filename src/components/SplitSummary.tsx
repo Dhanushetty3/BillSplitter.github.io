@@ -124,7 +124,7 @@ Thanks!`;
             doc.rect(pageMargin, y - 6, contentWidth, 10, 'F');
         }
         doc.text(res.friend, pageMargin, y);
-        doc.text(`₹${res.total.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
+        doc.text(`Rs. ${res.total.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
         y += 10;
     });
 
@@ -137,7 +137,7 @@ Thanks!`;
     doc.setFontSize(14);
     doc.setTextColor(primaryColor);
     doc.text("GRAND TOTAL", pageWidth / 2, y);
-    doc.text(`₹${total.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
+    doc.text(`Rs. ${total.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
 
     drawFooter(currentPage, totalPages);
     currentPage++;
@@ -171,7 +171,7 @@ Thanks!`;
                     doc.rect(pageMargin, y - 6, contentWidth, 10, 'F');
                 }
                 doc.text(item.name, pageMargin, y);
-                doc.text(`₹${item.cost.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
+                doc.text(`Rs. ${item.cost.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
                 y += 10;
             });
         } else {
@@ -193,15 +193,15 @@ Thanks!`;
         doc.setTextColor(textColor);
 
         doc.text("Subtotal:", summaryX, y, { align: 'right' });
-        doc.text(`₹${res.subtotal.toFixed(2)}`, valueX, y, { align: 'right' });
+        doc.text(`Rs. ${res.subtotal.toFixed(2)}`, valueX, y, { align: 'right' });
         y += 7;
         
         doc.text("Tax Share:", summaryX, y, { align: 'right' });
-        doc.text(`₹${res.taxShare.toFixed(2)}`, valueX, y, { align: 'right' });
+        doc.text(`Rs. ${res.taxShare.toFixed(2)}`, valueX, y, { align: 'right' });
         y += 7;
 
         doc.text("Tip Share:", summaryX, y, { align: 'right' });
-        doc.text(`₹${res.tipShare.toFixed(2)}`, valueX, y, { align: 'right' });
+        doc.text(`Rs. ${res.tipShare.toFixed(2)}`, valueX, y, { align: 'right' });
         y += 7;
         
         doc.setDrawColor("#E5E7EB");
@@ -212,7 +212,7 @@ Thanks!`;
         doc.setFontSize(14);
         doc.setTextColor(primaryColor);
         doc.text("Total Owed:", summaryX, y, { align: 'right' });
-        doc.text(`₹${res.total.toFixed(2)}`, valueX, y, { align: 'right' });
+        doc.text(`Rs. ${res.total.toFixed(2)}`, valueX, y, { align: 'right' });
 
         drawFooter(currentPage, totalPages);
         currentPage++;
