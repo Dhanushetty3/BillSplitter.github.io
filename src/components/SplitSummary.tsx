@@ -58,6 +58,9 @@ Thanks!`;
     const doc = new jsPDF();
     const dateStr = new Date().toLocaleDateString();
 
+    // --- Logo ---
+    const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwIDRIM0MyLjg5NTQzIDQgMiA0Ljg5NTQzIDIgNlYxOEMyIDE5LjEwNDYgMi44OTU0MyAyMCA0IDIwSDIwQzIxLjEwNDYgMjAgMjIgMTkuMTA0NiAyMiAxOFY2QzIyIDQuODk1NDMgMjEuMTA0NiA0IDIwIDRaIiBmaWxsPSIjM0I4MkY2Ii8+CjxwYXRoIGQ9Ik0xMi42MzY0IDguNTQ1NDVIOS40NTQ1NVY5LjYzNjM2SDEyLjA5MDlDMTIuNjgxOCA5LjYzNjM2IDEzLjE4MTggMTAuMTM2NCAxMy4xODE4IDEwLjcyNzNWMTEuMjcyN0MxMy4xODE4IDExLjg2MzYgMTIuNjgxOCAxMi4zNjM2IDEyLjA5MDkgMTIuMzYzNkg5LjQ1NDU1VjEzLjQ1NDVIMTIuMDkwOUMxMi42ODE4IDEzLjQ1NDUgMTMuMTgxOCAxMy45NTQ1IDEzLjE4MTggMTQuNTQ1NVYxNS4wOTA5QzEzLjE4MTggMTUuNjgwOCAxMi42ODE4IDE2LjE4MTggMTIuMDkwOSAxNi4xODE4SDguOTA5MDkiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTguOTA5MDkgMTAuNzI3M0gxMy4xODE4IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+
     // --- Theme and Config ---
     const primaryColor = "#3B82F6"; // blue-500 from Tailwind
     const textColor = "#1F2937"; // gray-800
@@ -69,10 +72,11 @@ Thanks!`;
 
     // --- Helper Functions ---
     const drawHeader = (title: string) => {
+        doc.addImage(logoDataUrl, 'SVG', pageMargin, 18, 10, 10);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
         doc.setTextColor(primaryColor);
-        doc.text("BillSplitter", pageMargin, 25);
+        doc.text("BillSplitter", pageMargin + 14, 25);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(14);
