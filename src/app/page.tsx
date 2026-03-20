@@ -308,7 +308,7 @@ export default function BillSplitter() {
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <DialogTitle className="text-2xl font-black text-center">Receipt Analyzed!</DialogTitle>
+            <DialogTitle className="text-2xl font-black text-center">Bill Analyzed!</DialogTitle>
             <DialogDescription className="text-center text-base pt-2">
               We found <span className="font-bold text-foreground">{items.length} items</span> totaling <span className="font-bold text-foreground">₹{billMeta.subtotal.toFixed(2)}</span> at <span className="font-bold text-foreground">{restaurantName || "the restaurant"}</span>.
             </DialogDescription>
@@ -358,7 +358,7 @@ export default function BillSplitter() {
               onClick={handleRevertConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Revert Changes
+              Revert to Scanned
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -747,5 +747,3 @@ function PercentageInput({ value, onChange }: { value: number; onChange: (val: n
     />
   );
 }
-
-    
