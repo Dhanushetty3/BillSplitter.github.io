@@ -431,7 +431,7 @@ export default function BillSplitter() {
                   onRemoveFriend={handleRemoveFriend}
                 />
                 {friends.length === 0 && isBillUploaded && (
-                  <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-dashed border-primary/20 text-center animate-bounce duration-[2000ms] transition-all">
+                  <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-dashed border-primary/20 text-center">
                     <ArrowUpCircle className="w-6 h-6 text-primary mx-auto mb-2 opacity-50" />
                     <p className="text-xs text-primary font-bold">Add friends here to start splitting!</p>
                   </div>
