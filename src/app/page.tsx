@@ -1,914 +1,737 @@
-'use client';
 
-import React, { 
-  useReducer, 
-  useState, 
-  useCallback, 
-  useMemo,
-  useRef,
-  ChangeEvent
-} from 'react';
-import { 
-  Users, 
-  FileText, 
-  Plus, 
-  Trash2, 
-  Camera, 
-  Upload, 
-  Sparkles, 
-  RefreshCw, 
-  FileDown,
-  X,
-  CheckCircle2,
-  Share2,
-  ChevronDown,
-  Moon
-} from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from "@/hooks/use-toast";
-import { cn, formatCurrency } from '@/lib/utils';
-import type { Bill, Participant, Item, SplitMethod } from '@/lib/types';
-import { AppLogo } from '@/components/icons/AppLogo';
-import { WhatsappIcon } from '@/components/icons/WhatsappIcon';
-import { SmsIcon } from '@/components/icons/SmsIcon';
-import { 
-  analyzeBillImage, 
-  analyzeDigitalBill, 
-  processNaturalLanguageItems 
-} from './actions';
+"use client";
+
+import React, { useState, useMemo, useEffect } from 'react';
+import { Receipt, Users, ListTodo, PieChart, RotateCcw, PlusCircle, AlertCircle, Sun, Moon, Store, Percent, Scale, ListFilter, PlayCircle, CheckCircle2, Undo2, ArrowDownCircle } from 'lucide-react';
+import BillUploader from '@/components/BillUploader';
+import FriendManager from '@/components/FriendManager';
+import ItemAssigner from '@/components/ItemAssigner';
+import SplitSummary from '@/components/SplitSummary';
+import { BillItem, calculateSplits, SplitMode } from '@/lib/bill-utils';
 import type { ScanPhysicalBillOutput } from '@/ai/flows/scan-physical-bill-flow';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
-type BillAction =
-  | { type: 'RESET_BILL' }
-  | { type: 'UPDATE_BILL_DETAILS'; payload: { name?: string; date?: string; place?: string, splitMethod?: SplitMethod, tax?: number, tip?: number } }
-  | { type: 'ADD_PARTICIPANT'; payload: Participant }
-  | { type: 'REMOVE_PARTICIPANT'; payload: { id: string } }
-  | { type: 'ADD_ITEM'; payload: Item }
-  | { type: 'UPDATE_ITEM'; payload: { id: string; updates: Partial<Item> } }
-  | { type: 'REMOVE_ITEM'; payload: { id: string } }
-  | { type: 'SET_FROM_AI', payload: Partial<Bill> };
+export default function BillSplitter() {
+  const { toast } = useToast();
+  const [items, setItems] = useState<BillItem[]>([]);
+  const [originalItems, setOriginalItems] = useState<BillItem[]>([]);
+  const [friends, setFriends] = useState<string[]>([]);
+  const [assignments, setAssignments] = useState<Record<string, string[]>>({});
+  const [splitMode, setSplitMode] = useState<SplitMode>('item-wise');
+  const [percentages, setPercentages] = useState<Record<string, number>>({});
+  const [editedFriends, setEditedFriends] = useState<Set<string>>(new Set());
+  const [restaurantName, setRestaurantName] = useState("");
+  const [billMeta, setBillMeta] = useState({ tax: 0, tip: 0, subtotal: 0 });
+  const [activeTab, setActiveTab] = useState("scan");
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  // Animation stages: 0 (Logo appearing), 1 (Quote fading in), 2 (Move to top)
+  const [animationStage, setAnimationStage] = useState(0);
 
-const initialState: Bill = {
-  name: "New Bill",
-  date: new Date().toISOString().split('T')[0],
-  participants: [],
-  items: [],
-  tax: 0,
-  tip: 0,
-  splitMethod: 'item-wise',
-};
-
-const billReducer = (state: Bill, action: BillAction): Bill => {
-  switch (action.type) {
-    case 'RESET_BILL':
-      return { ...initialState, date: new Date().toISOString().split('T')[0] };
-    case 'UPDATE_BILL_DETAILS':
-      return { ...state, ...action.payload };
-    case 'ADD_PARTICIPANT':
-      return { ...state, participants: [...state.participants, action.payload] };
-    case 'REMOVE_PARTICIPANT': {
-      const newParticipants = state.participants.filter(p => p.id !== action.payload.id);
-      const newItems = state.items.map(item => ({
-        ...item,
-        paidBy: item.paidBy === action.payload.id ? 'unassigned' : item.paidBy,
-        splitAmong: item.splitAmong.filter(id => id !== action.payload.id),
-      })).filter(item => item.splitAmong.length > 0 || item.paidBy !== 'unassigned');
-      return { ...state, participants: newParticipants, items: newItems };
+  useEffect(() => {
+    setMounted(true);
+    const isDark = localStorage.getItem('theme') === 'dark';
+    setIsDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
     }
-    case 'ADD_ITEM':
-      return { ...state, items: [...state.items, action.payload] };
-    case 'UPDATE_ITEM':
-      return {
-        ...state,
-        items: state.items.map(item =>
-          item.id === action.payload.id ? { ...item, ...action.payload.updates } : item
-        ),
-      };
-    case 'REMOVE_ITEM':
-      return { ...state, items: state.items.filter(item => item.id !== action.payload.id) };
-    case 'SET_FROM_AI': {
-       const aiData = action.payload;
-       let newState = { ...state };
-       
-       if (aiData.place) newState.place = aiData.place;
-       if (aiData.tax) newState.tax = aiData.tax;
-       if (aiData.tip) newState.tip = aiData.tip;
-       if (aiData.date) newState.date = aiData.date;
-       if (aiData.name) newState.name = aiData.name;
-       
-       const existingParticipants = [...newState.participants];
-       const newParticipantsFromAI = (aiData.participants || [])
-         .filter(p => !existingParticipants.some(ep => ep.name.toLowerCase() === p.name.toLowerCase()));
-       
-       newParticipantsFromAI.forEach(p => {
-           existingParticipants.push({ ...p, id: `p_${Date.now()}_${Math.random()}`});
-       });
-       newState.participants = existingParticipants;
 
-       const newItems = (aiData.items || []).map(item => {
-           let paidBy = 'unassigned';
-           const paidByParticipant = newState.participants.find(p => p.name.toLowerCase() === (item.paidBy as unknown as string)?.toLowerCase());
-           if (paidByParticipant) paidBy = paidByParticipant.id;
+    // Exact Sequence timings:
+    // 0s-1s: Logo centered.
+    // 1s-3s: Quote fades in very slowly (2s duration).
+    // 3s+: The move to header begins very slowly (4s duration).
+    const timer1 = setTimeout(() => setAnimationStage(1), 1000); 
+    const timer2 = setTimeout(() => setAnimationStage(2), 3000); 
 
-           const splitAmong = (item.splitAmong as unknown as string[])
-                .map(name => newState.participants.find(p => p.name.toLowerCase() === name.toLowerCase())?.id)
-                .filter((id): id is string => !!id);
-           
-           return {
-               ...item,
-               id: `i_${Date.now()}_${Math.random()}`,
-               paidBy,
-               splitAmong: splitAmong.length > 0 ? splitAmong : newState.participants.map(p => p.id),
-           };
-       });
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, []);
 
-       newState.items = [...newState.items, ...newItems];
-       if (aiData.place) {
-        newState.name = `${aiData.place} Bill`;
-       }
-
-       return newState;
+  const resetToEqualPercentages = () => {
+    if (friends.length > 0) {
+      const evenPercent = Math.floor((100 / friends.length) * 100) / 100;
+      const newPercents: Record<string, number> = {};
+      friends.forEach((f, i) => {
+        newPercents[f] = i === friends.length - 1 
+          ? Math.round((100 - evenPercent * (friends.length - 1)) * 100) / 100 
+          : evenPercent;
+      });
+      setPercentages(newPercents);
+      setEditedFriends(new Set());
     }
-    default:
-      return state;
-  }
-};
+  };
 
-const resizeImage = (file: File, maxSize: number): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (readerEvent) => {
-      const img = new Image();
-      img.src = readerEvent?.target?.result as string;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
+  useEffect(() => {
+    resetToEqualPercentages();
+  }, [friends.length]);
 
-        if (width > height) {
-          if (width > maxSize) {
-            height *= maxSize / width;
-            width = maxSize;
-          }
-        } else {
-          if (height > maxSize) {
-            width *= maxSize / height;
-            height = maxSize;
-          }
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    if (newMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
+  const calculatedSubtotal = useMemo(() => {
+    return items.reduce((sum, item) => sum + (item.lineTotal || 0), 0);
+  }, [items]);
+
+  useEffect(() => {
+    if (items.length > 0) {
+      setBillMeta(prev => ({ ...prev, subtotal: calculatedSubtotal }));
+    }
+  }, [calculatedSubtotal, items.length]);
+
+  const billTotal = useMemo(() => billMeta.subtotal + billMeta.tax + billMeta.tip, [billMeta]);
+
+  const onDataExtracted = (data: ScanPhysicalBillOutput) => {
+    const formattedItems: BillItem[] = data.items.map((it, idx) => ({
+      id: `item-${idx}-${Date.now()}`,
+      name: it.description,
+      quantity: 1, // Default quantity
+      price: it.amount, // Assume price is the full amount
+      lineTotal: it.amount,
+    }));
+    setItems(formattedItems);
+    setOriginalItems([...formattedItems]);
+    setRestaurantName(data.placeOfTransaction || "");
+    setBillMeta({
+      tax: data.tax,
+      tip: data.tip || 0,
+      subtotal: data.subtotal || formattedItems.reduce((sum, it) => sum + it.lineTotal, 0)
+    });
+
+    setShowSuccessModal(true);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    if (friends.length === 0) {
+      setTimeout(() => {
+        const section = document.getElementById('group-members-section');
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+          toast({
+            title: "Next Step",
+            description: "Add your friends below to start splitting the bill!",
+          });
         }
+      }, 300);
+    }
+  };
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          return reject(new Error('Could not get canvas context'));
+  const restoreOriginalItems = () => {
+    if (confirm("Restore all items to the original scanned state? Any manually added items will be removed.")) {
+      setItems([...originalItems]);
+    }
+  };
+
+  const handleToggleAssignment = (itemId: string, friend: string) => {
+    setAssignments(prev => {
+      const current = prev[itemId] || [];
+      if (current.includes(friend)) {
+        return { ...prev, [itemId]: current.filter(f => f !== friend) };
+      }
+      return { ...prev, [itemId]: [...current, friend] };
+    });
+  };
+
+  const handleUpdateItem = (id: string, updates: Partial<BillItem>) => {
+    setItems(prev => prev.map(it => {
+      if (it.id === id) {
+        const newItem = { ...it, ...updates };
+        if (updates.price !== undefined || updates.quantity !== undefined) {
+          newItem.lineTotal = (newItem.price || 0) * (newItem.quantity || 0);
         }
-        ctx.drawImage(img, 0, 0, width, height);
-        const outputMimeType = file.type === 'image/png' ? 'image/jpeg' : file.type;
-        resolve(canvas.toDataURL(outputMimeType, 0.8)); // 80% quality
-      };
-      img.onerror = (err) => reject(err);
+        return newItem;
+      }
+      return it;
+    }));
+  };
+
+  const handleDeleteItem = (id: string) => {
+    setItems(prev => prev.filter(it => it.id !== id));
+    setAssignments(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const handleRemoveFriend = (name: string) => {
+    setFriends(prev => prev.filter(f => f !== name));
+    setAssignments(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(itemId => {
+        next[itemId] = next[itemId].filter(f => f !== name);
+      });
+      return next;
+    });
+    setEditedFriends(prev => {
+      const next = new Set(prev);
+      next.delete(name);
+      return next;
+    });
+  };
+
+  const addNewItem = () => {
+    const newItem: BillItem = {
+      id: `manual-${Date.now()}`,
+      name: "New Item",
+      quantity: 1,
+      price: 0,
+      lineTotal: 0,
     };
-    reader.onerror = (err) => reject(err);
-  });
-};
+    setItems(prev => [...prev, newItem]);
+  };
 
-const Header = ({ onReset }: { onReset: () => void }) => (
-  <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 no-print">
-    <div className="flex items-center gap-2">
-      <AppLogo className="h-8 w-8" />
-      <h1 className="text-2xl font-bold tracking-tight text-primary">BillSplitter</h1>
-    </div>
-    <p className="hidden md:block text-sm text-muted-foreground italic ml-4">Split the bill, not the friendship.</p>
-    <div className="ml-auto">
-      <Button variant="ghost" size="icon" onClick={onReset} title="Reset Session">
-        <RefreshCw className="h-5 w-5" />
-      </Button>
-    </div>
-  </header>
-);
+  const handlePercentageChange = (friendName: string, newValue: number) => {
+    const updatedEdited = new Set(editedFriends);
+    updatedEdited.add(friendName);
+    setEditedFriends(updatedEdited);
 
-const Landing = ({ onScanSuccess, onReset }: { onScanSuccess: (data: ScanPhysicalBillOutput) => void, onReset: () => void }) => {
-    const { toast } = useToast();
-    const [isLoading, setIsLoading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const newPercents = { ...percentages, [friendName]: newValue };
+    
+    const uneditedFriends = friends.filter(f => !updatedEdited.has(f));
+    
+    if (uneditedFriends.length > 0) {
+      const sumEdited = Array.from(updatedEdited).reduce((sum, name) => sum + (newPercents[name] || 0), 0);
+      const remaining = Math.max(0, 100 - sumEdited);
+      const splitRemaining = remaining / uneditedFriends.length;
+      
+      uneditedFriends.forEach(f => {
+        newPercents[f] = Math.round(splitRemaining * 100) / 100;
+      });
+    }
 
-    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
+    setPercentages(newPercents);
+  };
 
-        setIsLoading(true);
-        try {
-            const dataUri = await resizeImage(file, 1024);
-            const result = await analyzeBillImage(dataUri);
+  const unassignedItems = useMemo(() => {
+    return items.filter(item => !assignments[item.id] || assignments[item.id].length === 0);
+  }, [items, assignments]);
 
-            if (result.success) {
-                onScanSuccess(result.data);
-            } else {
-                toast({ variant: 'destructive', title: 'Error', description: result.error });
-            }
-        } catch(e) {
-            const error = e instanceof Error ? e.message : 'Failed to read the file.';
-            toast({ variant: 'destructive', title: 'Error', description: error });
-            
-        } finally {
-            setIsLoading(false);
-        }
+  const totalPercentage = useMemo(() => Object.values(percentages).reduce((sum, p) => sum + p, 0), [percentages]);
 
-        if (event.target) event.target.value = '';
-    };
+  const splitResults = useMemo(() => {
+    return calculateSplits(items, friends, assignments, billMeta.tax, billMeta.tip, billMeta.subtotal, splitMode, percentages);
+  }, [items, friends, assignments, billMeta, splitMode, percentages]);
 
-    const triggerFileInput = () => fileInputRef.current?.click();
+  const isBillUploaded = useMemo(() => items.length > 0 || billMeta.subtotal > 0, [items.length, billMeta.subtotal]);
 
-    return (
-        <div className="flex flex-col min-h-screen bg-background">
-            <div className="absolute top-4 right-4 flex gap-2">
-                <Button variant="ghost" size="icon" onClick={onReset}>
-                    <RefreshCw className="h-5 w-5" />
-                </Button>
-            </div>
-            <main className="flex-1 flex flex-col items-center justify-center p-4 text-center">
-                <div className="flex items-center gap-4 mb-4">
-                    <AppLogo className="h-12 w-12"/>
-                    <h1 className="text-5xl font-bold text-primary tracking-tight">BillSplitter</h1>
-                </div>
-                <p className="text-muted-foreground text-lg mb-12">Split the bill, not the friendship.</p>
+  const totalMismatch = useMemo(() => {
+    if (friends.length === 0) return true;
+    if (splitMode === 'item-wise') {
+      return items.length === 0 || unassignedItems.length > 0;
+    }
+    if (splitMode === 'percentage') {
+      return Math.abs(100 - totalPercentage) > 0.05;
+    }
+    return false;
+  }, [splitMode, unassignedItems, totalPercentage, friends.length, items.length]);
 
-                <Card className="w-full max-w-lg border-dashed border-2 p-8 shadow-lg">
-                    <CardContent className="flex flex-col items-center justify-center gap-6">
-                         <div className="relative w-28 h-28 bg-accent rounded-full flex items-center justify-center">
-                            <FileText className="w-12 h-12 text-primary" />
-                            <div className="absolute bottom-2 right-2 bg-primary text-primary-foreground rounded-full p-1.5 shadow-md">
-                                <Camera className="w-5 h-5" />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <h2 className="text-2xl font-semibold">Scan Your Bill</h2>
-                            <p className="text-muted-foreground">Use your camera or upload a photo to extract<br/>items automatically.</p>
-                        </div>
-                        <div className="flex gap-4 w-full">
-                            <Button size="lg" className="flex-1" onClick={triggerFileInput} disabled={isLoading}>
-                                {isLoading ? 'Scanning...' : <><Camera className="mr-2"/> Take Photo</>}
-                            </Button>
-                            <Button size="lg" variant="outline" className="flex-1" onClick={triggerFileInput} disabled={isLoading}>
-                                {isLoading ? 'Scanning...' : <><Upload className="mr-2"/> Upload</>}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </main>
-            <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileChange}
-            />
+  const isAssignDisabled = useMemo(() => {
+    return !isBillUploaded || friends.length === 0;
+  }, [isBillUploaded, friends.length]);
+
+  const resetAll = () => {
+    if (confirm("Reset everything? All current progress will be lost.")) {
+      setItems([]);
+      setOriginalItems([]);
+      setFriends([]);
+      setAssignments({});
+      setPercentages({});
+      setEditedFriends(new Set());
+      setSplitMode('item-wise');
+      setBillMeta({ tax: 0, tip: 0, subtotal: 0 });
+      setRestaurantName("");
+      setActiveTab("scan");
+    }
+  };
+
+  if (!mounted) return null;
+
+  const hasChanges = items.length !== originalItems.length || 
+    items.some((it, idx) => {
+      const orig = originalItems.find(o => o.id === it.id);
+      return !orig || it.price !== orig.price || it.name !== orig.name || it.quantity !== orig.quantity;
+    });
+
+  return (
+    <main className={cn(
+      "max-w-5xl mx-auto px-4 pb-24 md:pb-12 safe-bottom min-h-screen overflow-x-hidden flex flex-col relative pt-12 md:pt-24",
+      isBillUploaded ? "py-4 md:py-8" : ""
+    )}>
+      
+      {/* Fixed Theme Toggle - Correctly placed at the top-right of the main container */}
+      {(animationStage >= 2 || isBillUploaded) && (
+        <div className="absolute right-4 top-4 md:top-8 z-[60] animate-in fade-in zoom-in duration-[1500ms]">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={toggleTheme}
+            className="h-10 w-10 rounded-full bg-card shadow-sm border-border"
+          >
+            {isDarkMode ? <Sun className="h-5 w-5 text-yellow-500" /> : <Moon className="h-5 w-5 text-slate-700" />}
+          </Button>
         </div>
-    );
+      )}
+
+      {/* Top Dynamic Spacer for centering */}
+      <div className={cn(
+        "transition-all duration-[4000ms] ease-in-out transform-gpu",
+        !isBillUploaded && animationStage < 2 ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
+      )} />
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader className="flex flex-col items-center justify-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
+              <CheckCircle2 className="w-10 h-10" />
+            </div>
+            <DialogTitle className="text-2xl font-black text-center">Receipt Analyzed!</DialogTitle>
+            <DialogDescription className="text-center text-base pt-2">
+              We found <span className="font-bold text-foreground">{items.length} items</span> totaling <span className="font-bold text-foreground">₹{billMeta.subtotal.toFixed(2)}</span> at <span className="font-bold text-foreground">{restaurantName || "the restaurant"}</span>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 text-center">
+            <p className="text-sm text-muted-foreground mb-4">Ready to split? Let's add your friends next.</p>
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={handleCloseSuccessModal} className="w-full h-12 rounded-full font-bold text-base shadow-md">
+              Great, Let's Go!
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Header & Logo Section */}
+      <div className={cn(
+        "transition-all duration-[4000ms] transform-gpu ease-in-out flex flex-col items-center justify-center w-full z-50",
+        !isBillUploaded && animationStage < 2 ? "mb-0" : "h-auto mb-2"
+      )}>
+        <div className={cn(
+          "flex flex-col items-center transition-all duration-[4000ms] transform-gpu",
+          !isBillUploaded && animationStage < 2 ? "scale-110 md:scale-125" : "scale-100"
+        )}>
+          <div className={cn(
+            "flex items-center justify-center gap-3 transition-all duration-[1000ms]",
+            animationStage >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          )}>
+            <div className="bg-primary p-2 md:p-3 rounded-2xl shadow-lg rotate-3 shrink-0">
+              <Receipt className="text-white w-8 h-8 md:w-10 md:h-10" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter text-foreground">
+              Bill<span className="text-primary">Splitter</span>
+            </h1>
+          </div>
+          
+          <p className={cn(
+            "mt-3 text-sm md:text-base text-muted-foreground font-medium text-center transition-all duration-[2000ms]",
+            animationStage >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+          )}>
+            Split the bill, not the friendship.
+          </p>
+        </div>
+      </div>
+
+      {/* Main Content Reveal */}
+      <div className={cn(
+        "transition-all duration-[4000ms] transform-gpu flex flex-col w-full",
+        animationStage < 2 && !isBillUploaded ? "opacity-0 pointer-events-none mt-0 h-0 overflow-hidden" : "opacity-100 translate-y-0 mt-4 h-auto"
+      )}>
+        
+        {!isBillUploaded ? (
+          <div className="max-w-xl mx-auto w-full py-2 space-y-4 animate-in fade-in duration-[4000ms]">
+            <div className="bg-card rounded-3xl p-6 md:p-8 shadow-xl border border-border/50">
+               <BillUploader onDataExtracted={onDataExtracted} />
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 animate-in fade-in duration-[2000ms]">
+            <div className="lg:col-span-4 space-y-6 animate-in slide-in-from-left-8 duration-[2000ms]">
+              <section id="group-members-section" className="bg-card rounded-2xl p-6 shadow-sm border border-border scroll-mt-24 transition-all hover:shadow-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-headline font-bold flex items-center gap-2">
+                    <Users className="w-5 h-5 text-primary" />
+                    Group Members
+                  </h3>
+                  <span className="text-xs bg-muted px-2 py-1 rounded-full font-medium">{friends.length}</span>
+                </div>
+                <FriendManager 
+                  friends={friends} 
+                  onAddFriend={name => setFriends(prev => [...prev, name])} 
+                  onRemoveFriend={handleRemoveFriend}
+                />
+                {friends.length === 0 && (
+                  <div className="mt-4 p-4 bg-primary/5 rounded-xl border border-dashed border-primary/20 text-center animate-bounce duration-[2000ms] transition-all">
+                    <ArrowDownCircle className="w-6 h-6 text-primary mx-auto mb-2 opacity-50" />
+                    <p className="text-xs text-primary font-bold">Add friends here to start splitting!</p>
+                  </div>
+                )}
+              </section>
+
+              <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1500ms] transition-all hover:shadow-md">
+                <h3 className="text-lg font-headline font-bold flex items-center gap-2 mb-4">
+                  <Receipt className="w-5 h-5 text-primary" />
+                  Bill Summary
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Store className="w-3.5 h-3.5" />
+                      Place
+                    </span>
+                    <Input 
+                      placeholder="Restaurant Name" 
+                      value={restaurantName} 
+                      onChange={e => setRestaurantName(e.target.value)}
+                      className="w-40 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
+                    />
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">₹</span>
+                      <Input 
+                        type="number" 
+                        value={billMeta.subtotal} 
+                        onChange={e => setBillMeta(prev => ({ ...prev, subtotal: parseFloat(e.target.value) || 0 }))}
+                        className="w-24 h-8 text-right font-bold border-none bg-muted/30 focus-visible:ring-1" 
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Tax</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">₹</span>
+                      <Input 
+                        type="number" 
+                        value={billMeta.tax} 
+                        onChange={e => setBillMeta(prev => ({ ...prev, tax: parseFloat(e.target.value) || 0 }))}
+                        className="w-24 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Tip</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">₹</span>
+                      <Input 
+                        type="number" 
+                        value={billMeta.tip} 
+                        onChange={e => setBillMeta(prev => ({ ...prev, tip: parseFloat(e.target.value) || 0 }))}
+                        className="w-24 h-8 text-right font-medium border-none bg-muted/30 focus-visible:ring-1" 
+                      />
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t flex justify-between items-center">
+                    <span className="font-bold text-foreground">Total</span>
+                    <span className="text-sm font-bold text-primary">₹{billTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              </section>
+
+              <div className="space-y-3">
+                <Button 
+                  variant="ghost" 
+                  className="w-full h-11 text-muted-foreground hover:bg-muted transition-all flex items-center justify-center gap-2 rounded-xl"
+                  onClick={resetAll}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset Session
+                </Button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-[2000ms]">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 h-14 bg-card p-1 rounded-2xl shadow-sm border border-border mb-6">
+                  <TabsTrigger value="scan" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white">
+                    <Receipt className="w-4 h-4 mr-2" />
+                    <span className="text-xs md:text-sm">Scan</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="assign" 
+                    disabled={isAssignDisabled}
+                    className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white disabled:opacity-30"
+                  >
+                    <ListTodo className="w-4 h-4 mr-2" />
+                    <span className="text-xs md:text-sm">Assign</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="summary" 
+                    disabled={totalMismatch}
+                    className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white disabled:opacity-30"
+                  >
+                    <PieChart className="w-4 h-4 mr-2" />
+                    <span className="text-xs md:text-sm">Split</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="scan" className="mt-0 focus-visible:outline-none">
+                  <div className="bg-card rounded-2xl p-10 shadow-sm border border-border overflow-hidden animate-in zoom-in-95 duration-[1500ms]">
+                    <div className="text-center space-y-8">
+                      <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2 animate-in zoom-in duration-[1000ms]">
+                        <CheckCircle2 className="w-12 h-12" />
+                      </div>
+                      
+                      <div className="animate-in fade-in slide-in-from-bottom-4 duration-[1000ms]">
+                        <h3 className="text-2xl font-bold mb-2">Receipt Analyzed!</h3>
+                        <p className="text-base text-muted-foreground">
+                          We found <span className="font-bold text-foreground">{items.length} items</span> totaling <span className="font-bold text-foreground">₹{billMeta.subtotal.toFixed(2)}</span>.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-4 max-w-xs mx-auto animate-in fade-in slide-in-from-bottom-6 duration-[1500ms]">
+                        <Button 
+                          onClick={() => {
+                            if (friends.length === 0) {
+                              const section = document.getElementById('group-members-section');
+                              section?.scrollIntoView({ behavior: 'smooth' });
+                            } else {
+                              setActiveTab("assign");
+                            }
+                          }}
+                          className="w-full bg-primary h-12 text-base font-bold shadow-md hover:bg-primary/90 rounded-full"
+                        >
+                          {friends.length === 0 ? "Add members to Assign" : "Yes, Let's Assign!"}
+                        </Button>
+
+                        <div className="pt-8 border-t mt-4">
+                          <p className="text-xs text-muted-foreground mb-4 italic font-medium">Wrong items or poor scan?</p>
+                          <BillUploader onDataExtracted={onDataExtracted} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="assign" className="mt-0 focus-visible:outline-none space-y-6">
+                  <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-[1000ms]">
+                    <Label className="text-xs font-bold uppercase text-muted-foreground mb-4 block tracking-widest">Split Method</Label>
+                    <RadioGroup 
+                      value={splitMode} 
+                      onValueChange={(val: any) => setSplitMode(val)}
+                      className="flex flex-col gap-4"
+                    >
+                      <div className="flex items-center space-x-3 py-1">
+                        <RadioGroupItem value="item-wise" id="item-wise" />
+                        <Label htmlFor="item-wise" className="cursor-pointer font-medium flex items-center gap-2">
+                          <ListFilter className="w-4 h-4 text-primary" />
+                          Item Wise
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-3 py-1">
+                        <RadioGroupItem value="equal" id="equal" />
+                        <Label htmlFor="equal" className="cursor-pointer font-medium flex items-center gap-2">
+                          <Scale className="w-4 h-4 text-primary" />
+                          Equal Split
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-3 py-1">
+                        <RadioGroupItem value="percentage" id="percentage" />
+                        <Label htmlFor="percentage" className="cursor-pointer font-medium flex items-center gap-2">
+                          <Percent className="w-4 h-4 text-primary" />
+                          Percentage
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {splitMode === 'item-wise' && (
+                    <div className="space-y-6 animate-in fade-in duration-[1000ms]">
+                      <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Items</h2>
+                        <div className="flex gap-2">
+                          {hasChanges && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={restoreOriginalItems} 
+                              className="h-9 text-muted-foreground hover:text-primary rounded-full px-4"
+                            >
+                              <Undo2 className="w-4 h-4 mr-1" />
+                              Restore Scanned
+                            </Button>
+                          )}
+                          <Button variant="outline" size="sm" onClick={addNewItem} className="h-9 border-primary/50 text-primary hover:bg-primary hover:text-white rounded-full px-4">
+                            <PlusCircle className="w-4 h-4 mr-1" />
+                            Add Item
+                          </Button>
+                        </div>
+                      </div>
+                      <ItemAssigner 
+                        items={items} 
+                        friends={friends} 
+                        assignments={assignments} 
+                        onToggleAssignment={handleToggleAssignment}
+                        onUpdateItem={handleUpdateItem}
+                        onDeleteItem={handleDeleteItem}
+                      />
+                    </div>
+                  )}
+
+                  {splitMode === 'equal' && (
+                    <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-[1000ms]">
+                      <Scale className="w-16 h-16 text-primary mx-auto mb-6 opacity-80" />
+                      <h3 className="text-2xl font-bold mb-3">Equal Split Active</h3>
+                      <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                        Divided equally among your <span className="font-bold text-foreground">{friends.length}</span> group members.
+                      </p>
+                      {friends.length > 0 && (
+                        <div className="mt-8 p-6 bg-primary/5 rounded-2xl inline-block border border-primary/10">
+                          <p className="text-xs uppercase font-bold text-primary/70 tracking-wider mb-2">Per Person</p>
+                          <p className="text-xl font-black text-primary">₹{(billTotal / friends.length).toFixed(2)}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {splitMode === 'percentage' && (
+                    <div className="space-y-6 animate-in fade-in duration-[1000ms]">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Percentages</h2>
+                          {friends.length > 0 && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={resetToEqualPercentages}
+                              className="h-7 text-[10px] uppercase font-bold text-muted-foreground hover:text-primary border-primary/20 rounded-full"
+                            >
+                              <RotateCcw className="w-3 h-3 mr-1" />
+                              Equalize
+                            </Button>
+                          )}
+                        </div>
+                        <div className={cn(
+                          "text-xs font-bold px-4 py-1.5 rounded-full border transition-all duration-500",
+                          Math.abs(100 - totalPercentage) < 0.05 ? "bg-green-100 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-100"
+                        )}>
+                          {Math.abs(100 - totalPercentage) < 0.05 ? "100.00%" : `${(100 - totalPercentage).toFixed(2)}% remaining`}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {friends.map(friend => (
+                          <Card key={friend} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md animate-in fade-in zoom-in-95 duration-700">
+                            <CardContent className="p-5 flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                                  <Users className="w-4 h-4" />
+                                </div>
+                                <span className="font-bold">{friend}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <PercentageInput 
+                                  value={percentages[friend] || 0}
+                                  onChange={(val) => handlePercentageChange(friend, val)}
+                                />
+                                <span className="text-muted-foreground font-bold">%</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {totalMismatch && (
+                    <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-[1000ms]">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle className="font-bold">
+                        {splitMode === 'percentage' ? `${(100 - totalPercentage).toFixed(2)}% remaining` : "Split incomplete"}
+                      </AlertTitle>
+                      <AlertDescription className="text-xs opacity-90">
+                        {splitMode === 'item-wise' ? (
+                          <span>Please assign all items to members.</span>
+                        ) : splitMode === 'percentage' ? (
+                          <span>Please adjust percentages to reach exactly 100.00%.</span>
+                        ) : "Total mismatch detected."}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="pt-8 flex justify-end">
+                    <Button 
+                      size="lg" 
+                      onClick={() => setActiveTab("summary")}
+                      disabled={totalMismatch}
+                      className="w-full sm:w-auto px-10 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-black shadow-lg h-14 rounded-full disabled:opacity-50 transition-all hover:scale-105"
+                    >
+                      View Split Summary
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="summary" className="mt-0 focus-visible:outline-none">
+                  <SplitSummary 
+                    splits={splitResults} 
+                    tax={billMeta.tax} 
+                    tip={billMeta.tip} 
+                    total={billTotal} 
+                    restaurantName={restaurantName}
+                    hasError={totalMismatch}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Dynamic Spacer for centering */}
+      <div className={cn(
+        "transition-all duration-[4000ms] ease-in-out transform-gpu",
+        !isBillUploaded && animationStage < 2 ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
+      )} />
+
+    </main>
+  );
 }
 
+function PercentageInput({ value, onChange }: { value: number; onChange: (val: number) => void }) {
+  const [localValue, setLocalValue] = useState(value.toFixed(2));
 
-const ParticipantManager = ({ participants, dispatch }: { participants: Participant[], dispatch: React.Dispatch<BillAction> }) => {
-  const [newParticipantName, setNewParticipantName] = useState('');
-
-  const handleAddParticipant = () => {
-    if (!newParticipantName.trim()) return;
-
-    const names = newParticipantName.split(',').map(name => name.trim()).filter(Boolean);
-    names.forEach(name => {
-      const newParticipant: Participant = {
-        id: `p_${Date.now()}_${Math.random()}`,
-        name: name,
-      };
-      dispatch({ type: 'ADD_PARTICIPANT', payload: newParticipant });
-    });
-    setNewParticipantName('');
-  };
-  
-  const getInitials = (name:string) => name.split(' ').map(n => n[0]).join('').toUpperCase();
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Users />Group Members</CardTitle>
-        <CardDescription>Add people to split the bill with.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-2">
-          <Input
-            value={newParticipantName}
-            onChange={(e) => setNewParticipantName(e.target.value)}
-            placeholder="Add name(s), comma separated"
-            onKeyDown={(e) => e.key === 'Enter' && handleAddParticipant()}
-          />
-          <Button onClick={handleAddParticipant}><Plus className="mr-2 h-4 w-4"/>Add</Button>
-        </div>
-        <div className="space-y-2">
-          {participants.map((p) => (
-            <div key={p.id} className="flex items-center justify-between p-2 rounded-md bg-accent">
-                <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                            {getInitials(p.name)}
-                        </AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium">{p.name}</span>
-                </div>
-              <Button variant="ghost" size="icon" onClick={() => dispatch({ type: 'REMOVE_PARTICIPANT', payload: { id: p.id } })}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-const BillSummaryCard = ({ bill, dispatch }: { bill: Bill, dispatch: React.Dispatch<BillAction> }) => {
-  const subtotal = bill.items.reduce((acc, item) => acc + item.amount, 0);
-  const total = subtotal + bill.tax + bill.tip;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><FileText />Bill Details</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 text-sm">
-        <div className="space-y-2">
-            <Label htmlFor="bill-name">Bill Name</Label>
-            <Input id="bill-name" value={bill.name} onChange={(e) => dispatch({ type: 'UPDATE_BILL_DETAILS', payload: { name: e.target.value } })} />
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="bill-place">Place</Label>
-            <Input id="bill-place" value={bill.place || ''} onChange={(e) => dispatch({ type: 'UPDATE_BILL_DETAILS', payload: { place: e.target.value } })} placeholder="e.g., The Grand Cafe"/>
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="bill-date">Date</Label>
-            <Input id="bill-date" type="date" value={bill.date} onChange={(e) => dispatch({ type: 'UPDATE_BILL_DETAILS', payload: { date: e.target.value } })} />
-        </div>
-        <Separator />
-         <div className="space-y-2">
-            <Label htmlFor="bill-tax">Tax</Label>
-            <Input id="bill-tax" type="number" value={bill.tax} onChange={(e) => dispatch({ type: 'UPDATE_BILL_DETAILS', payload: { tax: parseFloat(e.target.value) || 0 } })} />
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="bill-tip">Tip</Label>
-            <Input id="bill-tip" type="number" value={bill.tip} onChange={(e) => dispatch({ type: 'UPDATE_BILL_DETAILS', payload: { tip: parseFloat(e.target.value) || 0 } })} />
-        </div>
-        <Separator />
-        <div className="space-y-2 font-medium">
-            <div className="flex justify-between"><span>Subtotal:</span> <span>{formatCurrency(subtotal)}</span></div>
-            <div className="flex justify-between"><span>Tax:</span> <span>{formatCurrency(bill.tax)}</span></div>
-            <div className="flex justify-between"><span>Tip:</span> <span>{formatCurrency(bill.tip)}</span></div>
-            <div className="flex justify-between text-lg"><span>Total:</span> <span>{formatCurrency(total)}</span></div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-const AITools = ({ dispatch, participants }: { dispatch: React.Dispatch<BillAction>, participants: Participant[] }) => {
-    const { toast } = useToast();
-    const [isLoading, setIsLoading] = useState<string | null>(null);
-    const [naturalLanguageInput, setNaturalLanguageInput] = useState('');
-    const [aiResult, setAiResult] = useState<ScanPhysicalBillOutput | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>, tool: 'scan' | 'upload') => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        setIsLoading(tool);
-        try {
-            const dataUri = await resizeImage(file, 1024);
-            const result = tool === 'scan' ? await analyzeBillImage(dataUri) : await analyzeDigitalBill(dataUri);
-
-            if (result.success) {
-                setAiResult(result.data);
-            } else {
-                toast({ variant: 'destructive', title: 'Error', description: result.error });
-            }
-        } catch(e) {
-            const error = e instanceof Error ? e.message : 'Failed to read the file.';
-            toast({ variant: 'destructive', title: 'Error', description: error });
-        } finally {
-             setIsLoading(null);
-        }
-
-        if (event.target) event.target.value = '';
-    };
-    
-    const handleNaturalLanguageSubmit = async () => {
-        if (!naturalLanguageInput.trim()) return;
-        setIsLoading('nlp');
-        const result = await processNaturalLanguageItems(naturalLanguageInput, participants);
-
-        if (result.success) {
-            const aiBill = {
-                items: (result.data.items || []).map(item => {
-                    const paidByParticipant = participants.find(p => p.name.toLowerCase() === item.paidBy.toLowerCase());
-                    const splitAmongParticipants = item.splitAmong
-                        .map(name => participants.find(p => p.name.toLowerCase() === name.toLowerCase()))
-                        .filter(Boolean) as Participant[];
-                    
-                    return {
-                        id: `i_${Date.now()}_${Math.random()}`,
-                        description: item.description,
-                        amount: item.amount,
-                        paidBy: paidByParticipant ? paidByParticipant.id : 'unassigned',
-                        splitAmong: splitAmongParticipants.length > 0 ? splitAmongParticipants.map(p => p.id) : participants.map(p => p.id)
-                    };
-                }),
-                participants: result.data.items.flatMap(i => [i.paidBy, ...i.splitAmong])
-                    .filter((name, index, self) => self.indexOf(name) === index && name !== 'unassigned')
-                    .map(name => ({name}))
-            };
-            dispatch({ type: 'SET_FROM_AI', payload: aiBill as any});
-            setNaturalLanguageInput('');
-             toast({ title: 'Success', description: `${result.data.items.length} items added.`});
-        } else {
-            toast({ variant: 'destructive', title: 'Error', description: result.error });
-        }
-
-        setIsLoading(null);
-    };
-
-    const handleAcceptAiResult = () => {
-        if (aiResult) {
-            const payload: Partial<Bill> = {
-                place: aiResult.placeOfTransaction,
-                tax: aiResult.tax,
-                tip: aiResult.tip || 0,
-                items: aiResult.items.map(item => ({
-                    ...item,
-                    paidBy: 'unassigned',
-                    splitAmong: []
-                })) as any,
-                date: aiResult.date || undefined
-            };
-            dispatch({ type: 'SET_FROM_AI', payload });
-            setAiResult(null);
-            toast({ title: 'Success', description: 'Bill updated with scanned data.'});
-        }
-    };
-    
-    const triggerFileScan = () => fileInputRef.current?.click();
-    const triggerFileUpload = () => fileInputRef.current?.click();
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>AI-Powered Entry</CardTitle>
-                <CardDescription>Quickly add items using AI.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, e.currentTarget.id as any)}
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button onClick={() => { fileInputRef.current!.id = 'scan'; triggerFileScan(); }} disabled={!!isLoading} size="lg">
-                        {isLoading === 'scan' ? 'Scanning...' : <><Camera className="mr-2"/> Scan Physical Bill</>}
-                    </Button>
-                    <Button onClick={() => { fileInputRef.current!.id = 'upload'; triggerFileUpload(); }} disabled={!!isLoading} size="lg">
-                        {isLoading === 'upload' ? 'Uploading...' : <><Upload className="mr-2"/> Upload Digital Bill</>}
-                    </Button>
-                </div>
-                <div className="space-y-2 pt-4">
-                    <Label htmlFor="nlp-input" className="flex items-center gap-2"><Sparkles className="text-primary"/>Add Items with Natural Language</Label>
-                    <Textarea 
-                        id="nlp-input"
-                        placeholder="e.g., Alice paid for Pizza ₹25 and Coke ₹5, everyone shared Fries ₹10"
-                        value={naturalLanguageInput}
-                        onChange={(e) => setNaturalLanguageInput(e.target.value)}
-                        rows={3}
-                    />
-                    <Button onClick={handleNaturalLanguageSubmit} disabled={!!isLoading || participants.length === 0} className="w-full">
-                        {isLoading === 'nlp' ? 'Processing...' : 'Add Items'}
-                    </Button>
-                    {participants.length === 0 && <p className="text-xs text-muted-foreground text-center">Add participants to use this feature.</p>}
-                </div>
-            </CardContent>
-
-            <Dialog open={!!aiResult} onOpenChange={() => setAiResult(null)}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2"><CheckCircle2 className="text-accent-foreground"/>Receipt Analyzed!</DialogTitle>
-                        <DialogDescription>Review the extracted details. You can edit them later.</DialogDescription>
-                    </DialogHeader>
-                    {aiResult && (
-                        <div className="max-h-96 overflow-y-auto pr-4 text-sm">
-                            <p><strong>Place:</strong> {aiResult.placeOfTransaction}</p>
-                            <Separator className="my-2"/>
-                            <h4 className="font-semibold mb-1">Items:</h4>
-                            <ul className="list-disc pl-5 space-y-1">
-                                {aiResult.items.map((item, i) => (
-                                    <li key={i}>{item.description}: {formatCurrency(item.amount)}</li>
-                                ))}
-                            </ul>
-                            <Separator className="my-2"/>
-                            <div className="space-y-1 font-medium">
-                                <p className="flex justify-between"><span>Subtotal:</span> <span>{formatCurrency(aiResult.subtotal)}</span></p>
-                                <p className="flex justify-between"><span>Tax:</span> <span>{formatCurrency(aiResult.tax)}</span></p>
-                                {aiResult.tip && <p className="flex justify-between"><span>Tip:</span> <span>{formatCurrency(aiResult.tip)}</span></p>}
-                                <p className="flex justify-between text-base"><span>Total:</span> <span>{formatCurrency(aiResult.total)}</span></p>
-                            </div>
-                        </div>
-                    )}
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setAiResult(null)}>Wrong items?</Button>
-                        <Button onClick={handleAcceptAiResult}>Looks Good, Add to Bill</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </Card>
-    );
-};
-
-const ItemManager = ({ bill, dispatch }: { bill: Bill, dispatch: React.Dispatch<BillAction> }) => {
-    const [newItemDesc, setNewItemDesc] = useState('');
-    const [newItemAmount, setNewItemAmount] = useState('');
-    const [editingItemId, setEditingItemId] = useState<string | null>(null);
-
-    const handleAddItem = () => {
-        if (!newItemDesc.trim() || !newItemAmount) return;
-        const newItem: Item = {
-            id: `i_${Date.now()}_${Math.random()}`,
-            description: newItemDesc,
-            amount: parseFloat(newItemAmount),
-            paidBy: bill.participants[0]?.id || 'unassigned',
-            splitAmong: bill.participants.map(p => p.id),
-        };
-        dispatch({ type: 'ADD_ITEM', payload: newItem });
-        setNewItemDesc('');
-        setNewItemAmount('');
-    };
-
-    const handleUpdateItem = (id: string, updates: Partial<Item>) => {
-        dispatch({ type: 'UPDATE_ITEM', payload: { id, updates } });
+  useEffect(() => {
+    const parsedLocal = parseFloat(localValue);
+    if (!isNaN(parsedLocal) && Math.abs(parsedLocal - value) > 0.001) {
+      setLocalValue(value.toFixed(2));
     }
+  }, [value]);
 
-    const renderItemRow = (item: Item) => {
-        const isEditing = editingItemId === item.id;
-        return (
-            <div key={item.id} className="flex flex-col md:flex-row items-start md:items-center gap-2 p-2 rounded-lg bg-accent/50" onDoubleClick={() => setEditingItemId(item.id)}>
-                <div className="grid grid-cols-2 md:flex md:items-center gap-2 flex-1">
-                    {isEditing ? (
-                        <Input value={item.description} onChange={e => handleUpdateItem(item.id, { description: e.target.value })} className="md:w-48" />
-                    ) : (
-                        <span className="font-medium md:w-48 truncate" title={item.description}>{item.description}</span>
-                    )}
-                    {isEditing ? (
-                         <Input type="number" value={item.amount} onChange={e => handleUpdateItem(item.id, { amount: parseFloat(e.target.value) || 0 })} className="w-24"/>
-                    ) : (
-                        <span className="w-24">{formatCurrency(item.amount)}</span>
-                    )}
-                </div>
-                <div className="flex-1 w-full flex items-center gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full md:w-36 justify-between">
-                                <span className="truncate">{bill.participants.find(p => p.id === item.paidBy)?.name || 'Unassigned'}</span>
-                                <ChevronDown className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            {bill.participants.map(p => (
-                                <DropdownMenuItem key={p.id} onSelect={() => handleUpdateItem(item.id, { paidBy: p.id })}>
-                                    {p.name}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full md:w-36 justify-between">
-                                <span className="truncate">{item.splitAmong.length === bill.participants.length ? 'Everyone' : `${item.splitAmong.length} people`}</span>
-                                <ChevronDown className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem onSelect={() => handleUpdateItem(item.id, { splitAmong: bill.participants.map(p => p.id) })}>
-                                Everyone
-                            </DropdownMenuItem>
-                             {bill.participants.map(p => (
-                                <DropdownMenuItem key={p.id} onSelect={(e) => { e.preventDefault();
-                                  const newSplit = item.splitAmong.includes(p.id) ? item.splitAmong.filter(id => id !== p.id) : [...item.splitAmong, p.id];
-                                  handleUpdateItem(item.id, {splitAmong: newSplit.length > 0 ? newSplit : [p.id]});
-                                }}>
-                                    <Checkbox checked={item.splitAmong.includes(p.id)} className="mr-2"/> {p.name}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-                <div className="flex gap-2 self-end md:self-center">
-                  {isEditing && <Button size="icon" variant="ghost" onClick={() => setEditingItemId(null)}><CheckCircle2 className="h-4 w-4"/></Button>}
-                  <Button variant="ghost" size="icon" onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: { id: item.id } })}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                </div>
-            </div>
-        )
-    };
-
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Bill Items</CardTitle>
-                <CardDescription>Add or edit items on the bill. Double-click an item to edit.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                 <div className="flex flex-col md:flex-row gap-2">
-                    <Input placeholder="Item Description" value={newItemDesc} onChange={(e) => setNewItemDesc(e.target.value)} />
-                    <Input type="number" placeholder="Amount" value={newItemAmount} onChange={(e) => setNewItemAmount(e.target.value)} className="md:w-32" />
-                    <Button onClick={handleAddItem} disabled={bill.participants.length === 0} className="w-full md:w-auto">Add Item</Button>
-                </div>
-                 {bill.participants.length === 0 && <p className="text-xs text-muted-foreground text-center">Add participants before adding items.</p>}
-                <div className="space-y-2">
-                    {bill.items.map(renderItemRow)}
-                </div>
-            </CardContent>
-        </Card>
-    );
-};
-
-const SplitSummary = ({ bill }: { bill: Bill }) => {
-    const { toast } = useToast();
-
-    const calculation = useMemo(() => {
-        const participantBalances: { [key: string]: number } = {};
-        bill.participants.forEach(p => participantBalances[p.id] = 0);
-        
-        bill.items.forEach(item => {
-            const share = item.amount / item.splitAmong.length;
-            if(item.paidBy !== 'unassigned') participantBalances[item.paidBy] += item.amount;
-            item.splitAmong.forEach(pid => participantBalances[pid] -= share);
-        });
-
-        const subtotal = bill.items.reduce((acc, item) => acc + item.amount, 0);
-        
-        if (subtotal > 0) {
-            bill.participants.forEach(p => {
-                let p_subtotal = 0;
-                bill.items.forEach(item => {
-                    if (item.splitAmong.includes(p.id)) {
-                        p_subtotal += item.amount / item.splitAmong.length;
-                    }
-                });
-                const proportion = p_subtotal / subtotal;
-                participantBalances[p.id] -= (bill.tax + bill.tip) * proportion;
-            });
-        }
-        
-        const balances = bill.participants.map(p => ({
-            ...p,
-            balance: participantBalances[p.id]
-        }));
-        
-        const debtors = balances.filter(p => p.balance < 0).sort((a,b) => a.balance - b.balance);
-        const creditors = balances.filter(p => p.balance > 0).sort((a,b) => b.balance - a.balance);
-
-        const transactions: {from: string, to: string, amount: number}[] = [];
-
-        let i = 0, j = 0;
-        while(i < debtors.length && j < creditors.length) {
-            const debtor = debtors[i];
-            const creditor = creditors[j];
-            const amountToTransfer = Math.min(-debtor.balance, creditor.balance);
-
-            transactions.push({
-                from: debtor.name,
-                to: creditor.name,
-                amount: amountToTransfer,
-            });
-            
-            debtor.balance += amountToTransfer;
-            creditor.balance -= amountToTransfer;
-
-            if (Math.abs(debtor.balance) < 0.01) i++;
-            if (Math.abs(creditor.balance) < 0.01) j++;
-        }
-
-        return { participantTotals: balances, transactions };
-    }, [bill]);
-
-    const getParticipantTotal = (participantId: string) => {
-        const subtotal = bill.items.reduce((acc, item) => {
-            if (item.splitAmong.includes(participantId)) {
-                return acc + item.amount / item.splitAmong.length;
-            }
-            return acc;
-        }, 0);
-        
-        const totalSubtotal = bill.items.reduce((acc, item) => acc + item.amount, 0);
-        const proportion = totalSubtotal > 0 ? subtotal / totalSubtotal : (1 / bill.participants.length);
-        const taxShare = bill.tax * proportion;
-        const tipShare = bill.tip * proportion;
-        const total = subtotal + taxShare + tipShare;
-
-        return { subtotal, taxShare, tipShare, total };
-    };
-
-    const handlePrint = () => window.print();
-
-    const handleShare = (p: Participant, via: 'whatsapp' | 'sms') => {
-        const pTotal = getParticipantTotal(p.id);
-        let message = `Hi ${p.name}, here's your bill summary for "${bill.name}":\n\n`;
-        message += `Subtotal: ${formatCurrency(pTotal.subtotal)}\n`;
-        message += `Your share of Tax: ${formatCurrency(pTotal.taxShare)}\n`;
-        message += `Your share of Tip: ${formatCurrency(pTotal.tipShare)}\n`;
-        message += `-------------------\n`;
-        message += `TOTAL: ${formatCurrency(pTotal.total)}\n\n`;
-        
-        const pBalance = calculation.transactions.filter(t => t.from === p.name);
-        if (pBalance.length > 0) {
-            message += `You need to pay:\n`;
-            pBalance.forEach(t => {
-                message += `- ${formatCurrency(t.amount)} to ${t.to}\n`;
-            });
-        } else {
-            message += `You are all settled up, or others owe you!\n`;
-        }
-        
-        const encodedMessage = encodeURIComponent(message);
-        const url = via === 'whatsapp' 
-            ? `https://api.whatsapp.com/send?text=${encodedMessage}`
-            : `sms:?&body=${encodedMessage}`;
-        
-        window.open(url, '_blank');
-        toast({title: "Sharing...", description: "Your messaging app should open."});
-    };
-    
-    if (bill.participants.length === 0) return <Card><CardHeader><CardTitle>Split Summary</CardTitle></CardHeader><CardContent><p>Add participants and items to see the split.</p></CardContent></Card>
-
-    return (
-        <div className="space-y-6">
-            <Card className="printable-area" id="print-summary">
-                <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                        <CardTitle className="text-2xl">{bill.name} - Summary</CardTitle>
-                        <CardDescription>{new Date(bill.date).toLocaleDateString()} at {bill.place || 'Unknown Place'}</CardDescription>
-                        </div>
-                        <Button onClick={handlePrint} variant="outline" className="no-print"><FileDown className="mr-2 h-4 w-4"/>Export PDF</Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                       {bill.participants.map(p => {
-                           const pTotal = getParticipantTotal(p.id);
-                           return (
-                               <Card key={p.id} className="relative">
-                                   <CardHeader>
-                                       <CardTitle>{p.name}</CardTitle>
-                                   </CardHeader>
-                                   <CardContent className="space-y-1 text-sm">
-                                       <p className="flex justify-between"><span>Subtotal</span><span>{formatCurrency(pTotal.subtotal)}</span></p>
-                                       <p className="flex justify-between"><span>Tax</span><span>{formatCurrency(pTotal.taxShare)}</span></p>
-                                       <p className="flex justify-between"><span>Tip</span><span>{formatCurrency(pTotal.tipShare)}</span></p>
-                                       <Separator className="my-2"/>
-                                       <p className="flex justify-between font-bold text-base"><span>Total</span><span>{formatCurrency(pTotal.total)}</span></p>
-                                   </CardContent>
-                                   <CardFooter className="flex gap-2">
-                                       <Button size="sm" variant="outline" className="w-full" onClick={() => handleShare(p, 'whatsapp')}><WhatsappIcon className="mr-2 h-4 w-4"/>WhatsApp</Button>
-                                       <Button size="sm" variant="outline" className="w-full" onClick={() => handleShare(p, 'sms')}><SmsIcon className="mr-2 h-4 w-4"/>SMS</Button>
-                                   </CardFooter>
-                               </Card>
-                           )
-                       })}
-                   </div>
-                   
-                   <Card>
-                       <CardHeader>
-                           <CardTitle>Who Owes Whom</CardTitle>
-                       </CardHeader>
-                       <CardContent>
-                           {calculation.transactions.length > 0 ? (
-                               <ul className="space-y-2">
-                                   {calculation.transactions.map((t, i) => (
-                                       <li key={i} className="flex items-center gap-2 p-2 rounded-md bg-accent">
-                                           <span className="font-bold">{t.from}</span>
-                                           <span>&rarr;</span>
-                                           <span className="font-bold">{t.to}:</span>
-                                           <span className="font-mono ml-auto">{formatCurrency(t.amount)}</span>
-                                       </li>
-                                   ))}
-                               </ul>
-                           ) : (
-                               <p>Everyone is settled up!</p>
-                           )}
-                       </CardContent>
-                   </Card>
-                </CardContent>
-            </Card>
-        </div>
-    );
-};
-
-
-export default function BillSplitterPage() {
-  const [bill, dispatch] = useReducer(billReducer, initialState);
-  const [isBillActive, setIsBillActive] = useState(false);
-  const { toast } = useToast();
-  
-  const handleReset = useCallback(() => {
-    if(window.confirm("Are you sure you want to reset everything?")){
-        dispatch({ type: 'RESET_BILL' });
-        setIsBillActive(false);
-        toast({title: "Session Reset", description: "You can start over now."})
-    }
-  }, [toast]);
-  
-  const handleScanSuccess = (scanResult: ScanPhysicalBillOutput) => {
-    const payload: Partial<Bill> = {
-        place: scanResult.placeOfTransaction,
-        tax: scanResult.tax,
-        tip: scanResult.tip || 0,
-        items: scanResult.items.map(item => ({
-            ...item,
-            paidBy: 'unassigned',
-            splitAmong: []
-        })) as any,
-        date: scanResult.date || new Date().toISOString().split('T')[0]
-    };
-    dispatch({ type: 'SET_FROM_AI', payload });
-    setIsBillActive(true);
-    toast({ title: 'Success', description: 'Bill information extracted.'});
+  const handleBlur = () => {
+    const val = localValue === "" || isNaN(parseFloat(localValue)) ? 0 : parseFloat(localValue);
+    onChange(val);
+    setLocalValue(val.toFixed(2));
   };
 
-  if (!isBillActive) {
-    return <Landing onScanSuccess={handleScanSuccess} onReset={handleReset} />
-  }
-  
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header onReset={handleReset} />
-      <main className="flex-1 p-4 md:p-6 lg:p-8">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-1 space-y-6">
-            <ParticipantManager participants={bill.participants} dispatch={dispatch} />
-            <BillSummaryCard bill={bill} dispatch={dispatch} />
-          </div>
-
-          <div className="lg:col-span-2">
-            <Tabs defaultValue="assign">
-              <TabsList className="grid w-full grid-cols-3 no-print">
-                <TabsTrigger value="scan">AI Tools</TabsTrigger>
-                <TabsTrigger value="assign">Assign Items</TabsTrigger>
-                <TabsTrigger value="split">Split Summary</TabsTrigger>
-              </TabsList>
-              <TabsContent value="scan">
-                  <AITools dispatch={dispatch} participants={bill.participants} />
-              </TabsContent>
-              <TabsContent value="assign">
-                <ItemManager bill={bill} dispatch={dispatch} />
-              </TabsContent>
-              <TabsContent value="split">
-                <SplitSummary bill={bill} />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      </main>
-    </div>
+    <Input 
+      className="w-24 text-right h-10 rounded-lg bg-muted/30 border-none focus-visible:ring-1" 
+      value={localValue}
+      onChange={e => setLocalValue(e.target.value)}
+      onBlur={handleBlur}
+      onKeyDown={e => e.key === 'Enter' && handleBlur()}
+    />
   );
 }
