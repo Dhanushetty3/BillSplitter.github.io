@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { 
@@ -22,7 +21,8 @@ import {
   X,
   CheckCircle2,
   Share2,
-  ChevronDown
+  ChevronDown,
+  Moon
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -127,6 +127,8 @@ const billReducer = (state: Bill, action: BillAction): Bill => {
        if (aiData.place) newState.place = aiData.place;
        if (aiData.tax) newState.tax = aiData.tax;
        if (aiData.tip) newState.tip = aiData.tip;
+       if (aiData.date) newState.date = aiData.date;
+       if (aiData.name) newState.name = aiData.name;
        
        const existingParticipants = [...newState.participants];
        const newParticipantsFromAI = (aiData.participants || [])
@@ -155,6 +157,9 @@ const billReducer = (state: Bill, action: BillAction): Bill => {
        });
 
        newState.items = [...newState.items, ...newItems];
+       if (aiData.place) {
+        newState.name = `${aiData.place} Bill`;
+       }
 
        return newState;
     }
@@ -166,7 +171,7 @@ const billReducer = (state: Bill, action: BillAction): Bill => {
 const Header = ({ onReset }: { onReset: () => void }) => (
   <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 no-print">
     <div className="flex items-center gap-2">
-      <AppLogo className="h-7 w-7 text-primary" />
+      <AppLogo className="h-8 w-8" />
       <h1 className="text-2xl font-bold tracking-tight text-primary">BillSplitter</h1>
     </div>
     <p className="hidden md:block text-sm text-muted-foreground italic ml-4">Split the bill, not the friendship.</p>
@@ -177,6 +182,90 @@ const Header = ({ onReset }: { onReset: () => void }) => (
     </div>
   </header>
 );
+
+const Landing = ({ onScanSuccess, onReset }: { onScanSuccess: (data: ScanPhysicalBillOutput) => void, onReset: () => void }) => {
+    const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsLoading(true);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+            const dataUri = reader.result as string;
+            // For this simplified landing page, we'll use one function.
+            // We can differentiate between scan/upload if needed in future.
+            const result = await analyzeBillImage(dataUri);
+
+            if (result.success) {
+                onScanSuccess(result.data);
+            } else {
+                toast({ variant: 'destructive', title: 'Error', description: result.error });
+            }
+            setIsLoading(false);
+        };
+        reader.onerror = () => {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to read the file.' });
+            setIsLoading(false);
+        };
+
+        if (event.target) event.target.value = '';
+    };
+
+    const triggerFileInput = () => fileInputRef.current?.click();
+
+    return (
+        <div className="flex flex-col min-h-screen bg-background">
+            <div className="absolute top-4 right-4 flex gap-2">
+                <Button variant="ghost" size="icon" onClick={onReset}>
+                    <RefreshCw className="h-5 w-5" />
+                </Button>
+            </div>
+            <main className="flex-1 flex flex-col items-center justify-center p-4 text-center">
+                <div className="flex items-center gap-4 mb-4">
+                    <AppLogo className="h-12 w-12"/>
+                    <h1 className="text-5xl font-bold text-primary tracking-tight">BillSplitter</h1>
+                </div>
+                <p className="text-muted-foreground text-lg mb-12">Split the bill, not the friendship.</p>
+
+                <Card className="w-full max-w-lg border-dashed border-2 p-8 shadow-lg">
+                    <CardContent className="flex flex-col items-center justify-center gap-6">
+                         <div className="relative w-28 h-28 bg-accent rounded-full flex items-center justify-center">
+                            <FileText className="w-12 h-12 text-primary" />
+                            <div className="absolute bottom-2 right-2 bg-primary text-primary-foreground rounded-full p-1.5 shadow-md">
+                                <Camera className="w-5 h-5" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <h2 className="text-2xl font-semibold">Scan Your Bill</h2>
+                            <p className="text-muted-foreground">Use your camera or upload a photo to extract<br/>items automatically.</p>
+                        </div>
+                        <div className="flex gap-4 w-full">
+                            <Button size="lg" className="flex-1" onClick={triggerFileInput} disabled={isLoading}>
+                                {isLoading ? 'Scanning...' : <><Camera className="mr-2"/> Take Photo</>}
+                            </Button>
+                            <Button size="lg" variant="outline" className="flex-1" onClick={triggerFileInput} disabled={isLoading}>
+                                {isLoading ? 'Scanning...' : <><Upload className="mr-2"/> Upload</>}
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </main>
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+            />
+        </div>
+    );
+}
+
 
 const ParticipantManager = ({ participants, dispatch }: { participants: Participant[], dispatch: React.Dispatch<BillAction> }) => {
   const [newParticipantName, setNewParticipantName] = useState('');
@@ -308,7 +397,6 @@ const AITools = ({ dispatch, participants }: { dispatch: React.Dispatch<BillActi
             setIsLoading(null);
         };
 
-        // Reset file input
         if (event.target) event.target.value = '';
     };
     
@@ -318,7 +406,6 @@ const AITools = ({ dispatch, participants }: { dispatch: React.Dispatch<BillActi
         const result = await processNaturalLanguageItems(naturalLanguageInput, participants);
 
         if (result.success) {
-            // This AI flow already gives us items in the right structure
             const aiBill = {
                 items: (result.data.items || []).map(item => {
                     const paidByParticipant = participants.find(p => p.name.toLowerCase() === item.paidBy.toLowerCase());
@@ -557,7 +644,6 @@ const SplitSummary = ({ bill }: { bill: Bill }) => {
         const participantBalances: { [key: string]: number } = {};
         bill.participants.forEach(p => participantBalances[p.id] = 0);
         
-        // Item-wise split
         bill.items.forEach(item => {
             const share = item.amount / item.splitAmong.length;
             if(item.paidBy !== 'unassigned') participantBalances[item.paidBy] += item.amount;
@@ -566,7 +652,6 @@ const SplitSummary = ({ bill }: { bill: Bill }) => {
 
         const subtotal = bill.items.reduce((acc, item) => acc + item.amount, 0);
         
-        // Tax and Tip split
         if (subtotal > 0) {
             bill.participants.forEach(p => {
                 let p_subtotal = 0;
@@ -728,14 +813,37 @@ const SplitSummary = ({ bill }: { bill: Bill }) => {
 
 export default function BillSplitterPage() {
   const [bill, dispatch] = useReducer(billReducer, initialState);
+  const [isBillActive, setIsBillActive] = useState(false);
   const { toast } = useToast();
   
   const handleReset = useCallback(() => {
     if(window.confirm("Are you sure you want to reset everything?")){
         dispatch({ type: 'RESET_BILL' });
-        toast({title: "Session Reset", description: "You can start a new bill now."})
+        setIsBillActive(false);
+        toast({title: "Session Reset", description: "You can start over now."})
     }
   }, [toast]);
+  
+  const handleScanSuccess = (scanResult: ScanPhysicalBillOutput) => {
+    const payload: Partial<Bill> = {
+        place: scanResult.placeOfTransaction,
+        tax: scanResult.tax,
+        tip: scanResult.tip || 0,
+        items: scanResult.items.map(item => ({
+            ...item,
+            paidBy: 'unassigned',
+            splitAmong: []
+        })) as any,
+        date: scanResult.date || new Date().toISOString().split('T')[0]
+    };
+    dispatch({ type: 'SET_FROM_AI', payload });
+    setIsBillActive(true);
+    toast({ title: 'Success', description: 'Bill information extracted.'});
+  };
+
+  if (!isBillActive) {
+    return <Landing onScanSuccess={handleScanSuccess} onReset={handleReset} />
+  }
   
   return (
     <div className="flex flex-col min-h-screen">
