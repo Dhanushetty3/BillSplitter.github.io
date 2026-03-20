@@ -84,7 +84,7 @@ Thanks!`;
     };
 
     // --- Logo ---
-    const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI2IiBmaWxsPSIjM0I4MkY2Ii8+PHBhdGggZD0iTTQgMnYyMGwyLTEgMiAxIDItMSAyIDEgMi0xIDIgMSAyLTEgMiAxVjJsLTIgMS0yLTEtMiAxLTIgMS0yIDEtMi0xLTIgMVoiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMTYgOGgtNmEyIDIgMCAxIDAgMCA0aDRhMiAyIDAgMSAxIDAgNEg4IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTEyIDE3VjgiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=';
+    const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgcng9IjYiIGZpbGw9IiMwMEEzRkYiLz4KPHBhdGggZD0iTTguNSA3LjVIMTUuNVYxNS41QzE1LjUgMTYuMDUyMyAxNS4wNTIzIDE2LjUgMTQuNSAxNi41SDkuNUM4Ljk0NzcyIDE2LjUgOC41IDE2LjA1MjMgOC41IDE1LjVBNy41WiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPHBhdGggZD0iTTcuNSAxNi41TDguNSAxNy41TDkuNSAxNi41TDEwLjUgMTcuNUwxMS41IDE2LjVMMTIuNSAxNy41TDEzLjUgMTYuNUwxNC41IDE3LjVMMTUuNSAxNi41TDE2LjUgMTcuNSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTMuMjUgMTEuMjVDMTMuMjUgMTAuNTU5NiAxMi42OTA0IDEwIDEyIDEwQzExLjMwOTYgMTAgMTAuNzUgMTAuNTU5NiAxMC43NSAxMS4yNUMxMC43NSAxMS45NDA0IDExLjMwOTYgMTIuNSAxMiAxMi41SDEzLjI1TTMuMjUgMTEuMjVWMTNDMTMuMjUgMTMuNjkwNCAxMi42OTA0IDE0LjI1IDEyIDE0LjI1QzExLjMwOTYgMTQuMjUgMTAuNzUgMTMuNjkwNCAxMC43NSAxMyIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTIgOVYxNSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4=';
     
     let logoPngDataUrl: string;
     try {
@@ -96,7 +96,7 @@ Thanks!`;
     }
 
     // --- Theme and Config ---
-    const primaryColor = "#3B82F6"; // blue-500 from Tailwind
+    const primaryColor = "#00A3FF"; // Matching the logo's blue
     const textColor = "#1F2937"; // gray-800
     const mutedColor = "#6B7280"; // gray-500
     const pageMargin = 20;
@@ -109,10 +109,21 @@ Thanks!`;
         if (logoPngDataUrl) {
           doc.addImage(logoPngDataUrl, 'PNG', pageMargin, 18, 10, 10);
         }
+        
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
+        
+        const startX = pageMargin + (logoPngDataUrl ? 14 : 0);
+        
+        // Draw "Bill" in black
+        doc.setTextColor(textColor);
+        doc.text("Bill", startX, 25);
+        
+        const billWidth = doc.getTextWidth("Bill");
+        
+        // Draw "Splitter" in blue
         doc.setTextColor(primaryColor);
-        doc.text("BillSplitter", pageMargin + (logoPngDataUrl ? 14 : 0), 25);
+        doc.text("Splitter", startX + billWidth, 25);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(14);
