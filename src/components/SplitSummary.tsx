@@ -358,7 +358,7 @@ Thanks!`;
                 {res.items.map((item, idx) => (
                   <div key={idx} className="flex justify-between text-sm items-start">
                     <span className="text-muted-foreground/80 font-medium max-w-[70%] break-words">{item.name}</span>
-                    <span className="font-bold shrink-0">Rs.{item.cost.toFixed(2)}</span>
+                    <span className="font-bold shrink-0">Rs.${item.cost.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -366,21 +366,21 @@ Thanks!`;
               <div className="space-y-1.5 text-xs font-medium text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="text-foreground">Rs.{res.subtotal.toFixed(2)}</span>
+                  <span className="text-foreground">Rs.${res.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax Share</span>
-                  <span className="text-foreground">Rs.{res.taxShare.toFixed(2)}</span>
+                  <span className="text-foreground">Rs.${res.taxShare.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tip Share</span>
-                  <span className="text-foreground">Rs.{res.tipShare.toFixed(2)}</span>
+                  <span className="text-foreground">Rs.${res.tipShare.toFixed(2)}</span>
                 </div>
               </div>
               <div className="pt-2">
                 <div className="bg-primary/5 rounded-xl p-3 flex justify-between items-center border border-primary/10">
                   <span className="font-bold text-primary/80 text-xs uppercase tracking-wider">Owes</span>
-                  <span className="text-sm font-bold text-primary">Rs.{res.total.toFixed(2)}</span>
+                  <span className="text-sm font-bold text-primary">Rs.${res.total.toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>
@@ -419,11 +419,11 @@ Thanks!`;
             <div className="flex gap-8 border-t md:border-t-0 md:border-l border-white/20 pt-6 md:pt-0 md:pl-10 w-full md:w-auto justify-center md:justify-start">
               <div className="text-center">
                 <p className="text-primary-foreground/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">Total Tax</p>
-                <p className="font-bold text-sm">Rs.{tax.toFixed(2)}</p>
+                <p className="font-bold text-sm">Rs.${tax.toFixed(2)}</p>
               </div>
               <div className="text-center">
                 <p className="text-primary-foreground/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">Total Tip</p>
-                <p className="font-bold text-sm">Rs.{tip.toFixed(2)}</p>
+                <p className="font-bold text-sm">Rs.${tip.toFixed(2)}</p>
               </div>
             </div>
           </div>
