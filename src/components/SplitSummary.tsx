@@ -110,7 +110,7 @@ Thanks!`;
     doc.text("MEMBER", pageMargin, y);
     doc.text("TOTAL OWED", pageWidth - pageMargin, y, { align: 'right' });
     y += 8;
-    doc.setDrawColor("#E5E7EB");
+    doc.setDrawColor("#E5E7EB"); // gray-200
     doc.line(pageMargin, y, pageWidth - pageMargin, y);
     y += 8;
 
@@ -120,7 +120,7 @@ Thanks!`;
     doc.setTextColor(textColor);
     splits.forEach((res, index) => {
         if (index % 2 !== 0) { // Alternating row color
-            doc.setFillColor("#F9FAFB");
+            doc.setFillColor("#F9FAFB"); // gray-50
             doc.rect(pageMargin, y - 6, contentWidth, 10, 'F');
         }
         doc.text(res.friend, pageMargin, y);
