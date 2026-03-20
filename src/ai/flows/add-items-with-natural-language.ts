@@ -75,7 +75,7 @@ Instructions:
 - The amount should be a positive number.
 - Respond with a JSON object containing an array of these bill items.
 
-Example Input (naturalLanguageInput): "John paid for pizza $25 and coke $5, Sarah got salad $15. Everyone split fries $10. Mike paid $30 for a bottle of wine."
+Example Input (naturalLanguageInput): "John paid for pizza ₹25 and coke ₹5, Sarah got salad ₹15. Everyone split fries ₹10. Mike paid ₹30 for a bottle of wine."
 Example Participants: ["John", "Sarah", "Mike"]
 Expected Output:
 {

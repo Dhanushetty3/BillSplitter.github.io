@@ -396,7 +396,7 @@ const AITools = ({ dispatch, participants }: { dispatch: React.Dispatch<BillActi
                     <Label htmlFor="nlp-input" className="flex items-center gap-2"><Sparkles className="text-primary"/>Add Items with Natural Language</Label>
                     <Textarea 
                         id="nlp-input"
-                        placeholder="e.g., Alice paid for Pizza $25 and Coke $5, everyone shared Fries $10"
+                        placeholder="e.g., Alice paid for Pizza ₹25 and Coke ₹5, everyone shared Fries ₹10"
                         value={naturalLanguageInput}
                         onChange={(e) => setNaturalLanguageInput(e.target.value)}
                         rows={3}

@@ -54,7 +54,7 @@ Carefully identify and extract the following details:
 6.  **items**: A list of individual line items on the bill, each with its name/description and amount. Ensure all items are captured.
 7.  **participants**: A list of names of any individuals explicitly mentioned on the bill as customers, guests, or in a "split by" section. If no participants are explicitly named, return an empty array.
 
-Assume currency is USD unless otherwise specified. Ensure all monetary values are parsed as numbers. If any numeric value (subtotal, tax, tip, total, item amounts) cannot be found, use 0.
+Assume currency is INR unless otherwise specified. Ensure all monetary values are parsed as numbers. If any numeric value (subtotal, tax, tip, total, item amounts) cannot be found, use 0.
 
 Digital Bill: {{media url=billDataUri}}`,
 });
