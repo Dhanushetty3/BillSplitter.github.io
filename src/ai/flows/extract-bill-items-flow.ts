@@ -100,9 +100,12 @@ const extractBillItemsFlow = ai.defineFlow(
     } catch (error: any) {
       console.error('Genkit Flow Error:', error);
       // Clean up error message for user display
-      const userMessage = error.message?.includes('503') 
-        ? 'The AI service is currently very busy. Please wait a moment and try again.'
-        : `Extraction failed: ${error.message || 'Unknown error'}`;
+      let userMessage = `Extraction failed: ${error.message || 'Unknown error'}`;
+      if (error.message?.includes('API key')) {
+        userMessage = 'The Google AI API key is missing. Please create one and add it to your .env file as `GEMINI_API_KEY=YOUR_API_KEY`.';
+      } else if (error.message?.includes('503')) {
+        userMessage = 'The AI service is currently very busy. Please wait a moment and try again.';
+      }
       throw new Error(userMessage);
     }
   }
