@@ -37,6 +37,7 @@ export default function BillSplitter() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showRevertDialog, setShowRevertDialog] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   
   // Animation stages: 0 (Logo appearing), 1 (Quote fading in), 2 (Move to top)
   const [animationStage, setAnimationStage] = useState(0);
@@ -47,23 +48,75 @@ export default function BillSplitter() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // --- Online/Offline Listeners ---
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    setIsOnline(navigator.onLine);
+
+    // --- Theme ---
     const isDark = localStorage.getItem('theme') === 'dark';
     setIsDarkMode(isDark);
     if (isDark) {
       document.documentElement.classList.add('dark');
     }
 
-    // This one-time animation effect should not be re-triggered on reset
-    if (animationStage === 0) {
-      const timer1 = setTimeout(() => setAnimationStage(1), 1000); 
-      const timer2 = setTimeout(() => setAnimationStage(2), 3000); 
-
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-      };
+    // --- Load State from localStorage ---
+    try {
+        const savedState = localStorage.getItem('billSplitterState');
+        if (savedState) {
+            const parsed = JSON.parse(savedState);
+            setItems(parsed.items || []);
+            setOriginalItems(parsed.originalItems || []);
+            setFriends(parsed.friends || []);
+            setAssignments(parsed.assignments || {});
+            setSplitMode(parsed.splitMode || 'item-wise');
+            setPercentages(parsed.percentages || {});
+            setEditedFriends(new Set(parsed.editedFriends || []));
+            setRestaurantName(parsed.restaurantName || "");
+            setBillMeta(parsed.billMeta || { tax: 0, tip: 0, subtotal: 0 });
+            setAnimationStage(2); // Skip animation if data exists
+        } else {
+            // --- Animation for first time visit ---
+            const timer1 = setTimeout(() => setAnimationStage(1), 1000); 
+            const timer2 = setTimeout(() => setAnimationStage(2), 3000);
+        }
+    } catch (error) {
+        console.error("Failed to load state from localStorage", error);
+        localStorage.removeItem('billSplitterState');
+        const timer1 = setTimeout(() => setAnimationStage(1), 1000); 
+        const timer2 = setTimeout(() => setAnimationStage(2), 3000);
     }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
+
+  // --- Save State to localStorage ---
+  useEffect(() => {
+    if (!mounted) return;
+    try {
+      const stateToSave = {
+          items,
+          originalItems,
+          friends,
+          assignments,
+          splitMode,
+          percentages,
+          editedFriends: Array.from(editedFriends),
+          restaurantName,
+          billMeta,
+      };
+      localStorage.setItem('billSplitterState', JSON.stringify(stateToSave));
+    } catch (error) {
+      console.error("Failed to save state to localStorage", error);
+    }
+  }, [items, originalItems, friends, assignments, splitMode, percentages, editedFriends, restaurantName, billMeta, mounted]);
+
 
   const resetToEqualPercentages = () => {
     if (friends.length > 0) {
@@ -80,8 +133,10 @@ export default function BillSplitter() {
   };
 
   useEffect(() => {
-    resetToEqualPercentages();
-  }, [friends.length]);
+    if (mounted) { // Ensure this runs after initial data load
+        resetToEqualPercentages();
+    }
+  }, [friends.length, mounted]);
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;
@@ -255,17 +310,8 @@ export default function BillSplitter() {
   }, [isBillUploaded, friends.length]);
 
   const handleResetSession = () => {
-    setItems([]);
-    setOriginalItems([]);
-    setFriends([]);
-    setAssignments({});
-    setPercentages({});
-    setEditedFriends(new Set());
-    setSplitMode('item-wise');
-    setBillMeta({ tax: 0, tip: 0, subtotal: 0 });
-    setRestaurantName("");
-    setActiveTab("scan");
-    setShowResetDialog(false);
+    localStorage.removeItem('billSplitterState');
+    window.location.reload(); // Easiest way to guarantee a clean slate and re-run entry animation
   };
 
   if (!mounted) return null;
@@ -330,7 +376,7 @@ export default function BillSplitter() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will reset the entire session. All your current progress will be lost.
+              This will clear all items, friends, and assignments and reload the app. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -405,7 +451,7 @@ export default function BillSplitter() {
         {!isBillUploaded ? (
           <div className="max-w-xl mx-auto w-full py-2 space-y-4 animate-in fade-in duration-[4000ms]">
             <div className="bg-card rounded-3xl p-6 md:p-8 shadow-xl border border-border/50">
-               <BillUploader onDataExtracted={onDataExtracted} />
+               <BillUploader onDataExtracted={onDataExtracted} isOnline={isOnline} />
             </div>
           </div>
         ) : (
@@ -546,7 +592,7 @@ export default function BillSplitter() {
                       <p className="text-sm text-center text-muted-foreground mb-4 font-medium">
                         Wrong items or poor scan?
                       </p>
-                      <BillUploader onDataExtracted={onDataExtracted} />
+                      <BillUploader onDataExtracted={onDataExtracted} isOnline={isOnline} />
                     </div>
                   </TabsContent>
 

@@ -1,7 +1,8 @@
+
 "use client";
 
 import React, { useState } from 'react';
-import { Upload, Loader2, FileText, Camera, PlayCircle } from 'lucide-react';
+import { Upload, Loader2, FileText, Camera, PlayCircle, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { analyzeBillImage, generateDemoBill } from '@/app/actions';
 import type { DemoBillData } from '@/app/actions';
@@ -10,9 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface BillUploaderProps {
   onDataExtracted: (data: ExtractBillItemsOutput | DemoBillData) => void;
+  isOnline: boolean;
 }
 
-export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
+export default function BillUploader({ onDataExtracted, isOnline }: BillUploaderProps) {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const { toast } = useToast();
@@ -52,6 +54,14 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
   };
 
   const processImage = async (dataUrl: string) => {
+    if (!isOnline) {
+      toast({
+        variant: "destructive",
+        title: "Offline",
+        description: "AI scanning requires an internet connection.",
+      });
+      return;
+    }
     setLoading(true);
     try {
       const compressedBase64 = await compressAndResizeImage(dataUrl);
@@ -129,10 +139,17 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
       <p className="text-muted-foreground text-center mb-6 max-w-xs text-sm">
       Take a pic of your bill or upload it - We'll handle the annoying part
       </p>
+
+      {!isOnline && (
+        <div className="mb-4 w-full max-w-xs text-center p-3 bg-destructive/10 text-destructive text-sm rounded-lg border border-destructive/20 flex items-center justify-center gap-2">
+            <WifiOff className="w-4 h-4" />
+            <span>AI scanning is unavailable offline.</span>
+        </div>
+      )}
       
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
         <Button 
-          disabled={loading || demoLoading}
+          disabled={loading || demoLoading || !isOnline}
           onClick={() => document.getElementById('camera-capture')?.click()}
           className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold h-11"
         >
@@ -142,7 +159,7 @@ export default function BillUploader({ onDataExtracted }: BillUploaderProps) {
         
         <Button 
           variant="outline"
-          disabled={loading || demoLoading}
+          disabled={loading || demoLoading || !isOnline}
           onClick={() => document.getElementById('bill-upload')?.click()}
           className="flex-1 border-primary/30 text-primary hover:bg-primary/5 h-11"
         >
