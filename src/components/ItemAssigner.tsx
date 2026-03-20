@@ -51,7 +51,7 @@ export default function ItemAssigner({
                 </div>
                 
 
-                <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 pt-2">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pt-2">
                     <div className="flex items-end gap-3 sm:gap-4">
                         <div className="grid gap-1.5">
                             <Label htmlFor={`qty-${item.id}`} className="text-xs font-medium">Qty</Label>
@@ -86,7 +86,7 @@ export default function ItemAssigner({
                     </div>
 
                     <div className="text-right">
-                        <p className="text-xs text-muted-foreground">Item Total</p>
+                        <p className="text-xs text-muted-foreground sm:hidden">Item Total</p>
                         <p className="text-xl font-bold text-primary">₹{item.lineTotal.toFixed(2)}</p>
                     </div>
                 </div>
