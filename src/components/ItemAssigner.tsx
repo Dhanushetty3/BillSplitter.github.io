@@ -51,8 +51,8 @@ export default function ItemAssigner({
                 </div>
                 
 
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pt-2">
-                    <div className="flex items-end gap-3 sm:gap-4">
+                <div className="flex justify-between items-end gap-4 pt-2">
+                    <div className="flex items-end gap-2">
                         <div className="grid gap-1.5">
                             <Label htmlFor={`qty-${item.id}`} className="text-xs font-medium">Qty</Label>
                             <Input
@@ -63,7 +63,7 @@ export default function ItemAssigner({
                                 const q = parseInt(e.target.value);
                                 onUpdateItem(item.id, { quantity: isNaN(q) ? 0 : q });
                                 }}
-                                className="w-16 h-9 text-center bg-muted/50 rounded-md border-input"
+                                className="w-14 h-9 text-center bg-muted/50 rounded-md border-input"
                             />
                         </div>
                         <div className="grid gap-1.5">
@@ -79,14 +79,14 @@ export default function ItemAssigner({
                                     const p = parseFloat(e.target.value);
                                     onUpdateItem(item.id, { price: isNaN(p) ? 0 : p });
                                     }}
-                                    className="w-24 h-9 text-center bg-muted/50 rounded-md border-input"
+                                    className="w-20 h-9 text-center bg-muted/50 rounded-md border-input"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="text-right">
-                        <p className="text-xs text-muted-foreground sm:hidden">Item Total</p>
+                    <div className="text-right shrink-0">
+                        <p className="text-xs text-muted-foreground">Item Total</p>
                         <p className="text-xl font-bold text-primary">₹{item.lineTotal.toFixed(2)}</p>
                     </div>
                 </div>
