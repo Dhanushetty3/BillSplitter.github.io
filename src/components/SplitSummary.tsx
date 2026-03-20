@@ -4,10 +4,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SplitResult } from '@/lib/bill-utils';
 import { Separator } from '@/components/ui/separator';
-import { User, Receipt, MessageCircle, MessageSquare, FileDown, Store } from 'lucide-react';
+import { User, Receipt, FileDown, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { jsPDF } from "jspdf";
+import { WhatsappIcon } from './icons/WhatsappIcon';
+import { SmsIcon } from './icons/SmsIcon';
 
 interface SplitSummaryProps {
   splits: SplitResult[];
@@ -229,7 +231,7 @@ Thanks!`;
                           className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100 disabled:opacity-30 rounded-full transition-all"
                           onClick={() => shareWhatsApp(res)}
                         >
-                          <MessageCircle className="w-4 h-4" />
+                          <WhatsappIcon className="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>{hasError ? "Incomplete split" : "Share via WhatsApp"}</TooltipContent>
@@ -246,7 +248,7 @@ Thanks!`;
                           className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100 disabled:opacity-30 rounded-full transition-all"
                           onClick={() => shareSMS(res)}
                         >
-                          <MessageSquare className="w-4 h-4" />
+                          <SmsIcon className="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>{hasError ? "Incomplete split" : "Share via SMS"}</TooltipContent>
