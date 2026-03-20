@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import type { DemoBillData } from '@/app/actions';
@@ -36,6 +37,7 @@ export default function BillSplitter() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
   
   // Animation stages: 0 (Logo appearing), 1 (Quote fading in), 2 (Move to top)
   const [animationStage, setAnimationStage] = useState(0);
@@ -253,19 +255,18 @@ export default function BillSplitter() {
     return !isBillUploaded || friends.length === 0;
   }, [isBillUploaded, friends.length]);
 
-  const resetAll = () => {
-    if (confirm("Reset everything? All current progress will be lost.")) {
-      setItems([]);
-      setOriginalItems([]);
-      setFriends([]);
-      setAssignments({});
-      setPercentages({});
-      setEditedFriends(new Set());
-      setSplitMode('item-wise');
-      setBillMeta({ tax: 0, tip: 0, subtotal: 0 });
-      setRestaurantName("");
-      setActiveTab("scan");
-    }
+  const handleResetSession = () => {
+    setItems([]);
+    setOriginalItems([]);
+    setFriends([]);
+    setAssignments({});
+    setPercentages({});
+    setEditedFriends(new Set());
+    setSplitMode('item-wise');
+    setBillMeta({ tax: 0, tip: 0, subtotal: 0 });
+    setRestaurantName("");
+    setActiveTab("scan");
+    setShowResetDialog(false);
   };
 
   if (!mounted) return null;
@@ -324,6 +325,27 @@ export default function BillSplitter() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will reset the entire session. All your current progress will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleResetSession}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Reset Session
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       {/* Header & Logo Section */}
       <div className={cn(
@@ -456,7 +478,7 @@ export default function BillSplitter() {
                 <Button 
                   variant="ghost" 
                   className="w-full h-11 text-muted-foreground hover:bg-muted transition-all flex items-center justify-center gap-2 rounded-xl"
-                  onClick={resetAll}
+                  onClick={() => setShowResetDialog(true)}
                 >
                   <RotateCcw className="w-4 h-4" />
                   Reset Session
