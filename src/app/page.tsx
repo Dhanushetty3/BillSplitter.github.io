@@ -41,6 +41,10 @@ export default function BillSplitter() {
   // Animation stages: 0 (Logo appearing), 1 (Quote fading in), 2 (Move to top)
   const [animationStage, setAnimationStage] = useState(0);
 
+  const isBillUploaded = useMemo(() => items.length > 0 || billMeta.subtotal > 0, [items.length, billMeta.subtotal]);
+  const showFullLayout = isBillUploaded && friends.length > 0;
+  const isCenteredLayout = !showFullLayout;
+
   useEffect(() => {
     setMounted(true);
     const isDark = localStorage.getItem('theme') === 'dark';
@@ -49,18 +53,17 @@ export default function BillSplitter() {
       document.documentElement.classList.add('dark');
     }
 
-    // Exact Sequence timings:
-    // 0s-1s: Logo centered.
-    // 1s-3s: Quote fades in very slowly (2s duration).
-    // 3s+: The move to header begins very slowly (4s duration).
-    const timer1 = setTimeout(() => setAnimationStage(1), 1000); 
-    const timer2 = setTimeout(() => setAnimationStage(2), 3000); 
+    // This one-time animation effect should not be re-triggered on reset
+    if (animationStage === 0) {
+      const timer1 = setTimeout(() => setAnimationStage(1), 1000); 
+      const timer2 = setTimeout(() => setAnimationStage(2), 3000); 
 
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
+    }
+  }, [animationStage]);
 
   const resetToEqualPercentages = () => {
     if (friends.length > 0) {
@@ -236,8 +239,6 @@ export default function BillSplitter() {
     return calculateSplits(items, friends, assignments, billMeta.tax, billMeta.tip, billMeta.subtotal, splitMode, percentages);
   }, [items, friends, assignments, billMeta, splitMode, percentages]);
 
-  const isBillUploaded = useMemo(() => items.length > 0 || billMeta.subtotal > 0, [items.length, billMeta.subtotal]);
-
   const totalMismatch = useMemo(() => {
     if (friends.length === 0) return true;
     if (splitMode === 'item-wise') {
@@ -277,11 +278,11 @@ export default function BillSplitter() {
 
   return (
     <main className={cn(
-      "max-w-5xl mx-auto px-4 pb-24 md:pb-12 safe-bottom min-h-screen overflow-x-hidden flex flex-col relative pt-12 md:pt-24",
-      isBillUploaded ? "py-4 md:py-8" : ""
+      "max-w-5xl mx-auto px-4 pb-24 md:pb-12 safe-bottom min-h-screen overflow-x-hidden flex flex-col relative",
+      showFullLayout ? "py-4 md:py-8" : "pt-12 md:pt-24"
     )}>
       
-      {/* Fixed Theme Toggle - Correctly placed at the top-right of the main container */}
+      {/* Fixed Theme Toggle */}
       {(animationStage >= 2 || isBillUploaded) && (
         <div className="absolute right-4 top-4 md:top-8 z-[60] animate-in fade-in zoom-in duration-[1500ms]">
           <Button 
@@ -298,7 +299,7 @@ export default function BillSplitter() {
       {/* Top Dynamic Spacer for centering */}
       <div className={cn(
         "transition-all duration-[4000ms] ease-in-out transform-gpu",
-        !isBillUploaded && animationStage < 2 ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
+        isCenteredLayout ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
       )} />
 
       {/* Success Dialog */}
@@ -368,11 +369,11 @@ export default function BillSplitter() {
       {/* Header & Logo Section */}
       <div className={cn(
         "transition-all duration-[4000ms] transform-gpu ease-in-out flex flex-col items-center justify-center w-full z-50",
-        !isBillUploaded && animationStage < 2 ? "mb-0" : "h-auto mb-2"
+        isCenteredLayout ? "mb-0" : "h-auto mb-2"
       )}>
         <div className={cn(
           "flex flex-col items-center transition-all duration-[4000ms] transform-gpu",
-          !isBillUploaded && animationStage < 2 ? "scale-110 md:scale-125" : "scale-100"
+          isCenteredLayout && animationStage < 2 ? "scale-110 md:scale-125" : "scale-100"
         )}>
           <div className={cn(
             "flex items-center justify-center gap-3 transition-all duration-[1000ms]",
@@ -410,11 +411,11 @@ export default function BillSplitter() {
         ) : (
           <div className={cn(
             "animate-in fade-in duration-[2000ms]",
-            friends.length > 0 ? "grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8" : "flex flex-col items-center"
+            showFullLayout ? "grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8" : "flex flex-col items-center"
           )}>
             <div className={cn(
-              "w-full space-y-6 animate-in slide-in-from-left-8 duration-[2000ms]",
-              isBillUploaded ? "lg:max-w-lg" : ""
+              "w-full space-y-6",
+              showFullLayout ? "lg:col-span-4 animate-in slide-in-from-left-8 duration-[2000ms]" : "lg:max-w-lg"
             )}>
               <section id="group-members-section" className="bg-card rounded-2xl p-6 shadow-sm border border-border scroll-mt-24 transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
@@ -437,7 +438,7 @@ export default function BillSplitter() {
                 )}
               </section>
 
-              {friends.length > 0 && isBillUploaded && (
+              {showFullLayout && (
                 <>
                   <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1500ms] transition-all hover:shadow-md">
                     <h3 className="text-lg font-headline font-bold flex items-center gap-2 mb-4">
@@ -514,7 +515,7 @@ export default function BillSplitter() {
               )}
             </div>
 
-            {friends.length > 0 && isBillUploaded && (
+            {showFullLayout && (
               <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-[2000ms]">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 h-14 bg-card p-1 rounded-2xl shadow-sm border border-border mb-6">
@@ -727,7 +728,7 @@ export default function BillSplitter() {
       {/* Bottom Dynamic Spacer for centering */}
       <div className={cn(
         "transition-all duration-[4000ms] ease-in-out transform-gpu",
-        !isBillUploaded && animationStage < 2 ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
+        isCenteredLayout ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
       )} />
 
     </main>
@@ -760,5 +761,3 @@ function PercentageInput({ value, onChange }: { value: number; onChange: (val: n
     />
   );
 }
-
-    
