@@ -231,7 +231,7 @@ Thanks!`;
                           className="h-8 w-8 disabled:opacity-30 rounded-full transition-all"
                           onClick={() => shareWhatsApp(res)}
                         >
-                          <WhatsappIcon className="w-5 h-5" />
+                          <WhatsappIcon className="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>{hasError ? "Incomplete split" : "Share via WhatsApp"}</TooltipContent>
