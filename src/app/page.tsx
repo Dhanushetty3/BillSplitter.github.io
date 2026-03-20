@@ -168,6 +168,45 @@ const billReducer = (state: Bill, action: BillAction): Bill => {
   }
 };
 
+const resizeImage = (file: File, maxSize: number): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (readerEvent) => {
+      const img = new Image();
+      img.src = readerEvent?.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height *= maxSize / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width *= maxSize / height;
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          return reject(new Error('Could not get canvas context'));
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const outputMimeType = file.type === 'image/png' ? 'image/jpeg' : file.type;
+        resolve(canvas.toDataURL(outputMimeType, 0.8)); // 80% quality
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
+
 const Header = ({ onReset }: { onReset: () => void }) => (
   <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 no-print">
     <div className="flex items-center gap-2">
@@ -193,12 +232,8 @@ const Landing = ({ onScanSuccess, onReset }: { onScanSuccess: (data: ScanPhysica
         if (!file) return;
 
         setIsLoading(true);
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-            const dataUri = reader.result as string;
-            // For this simplified landing page, we'll use one function.
-            // We can differentiate between scan/upload if needed in future.
+        try {
+            const dataUri = await resizeImage(file, 1024);
             const result = await analyzeBillImage(dataUri);
 
             if (result.success) {
@@ -206,12 +241,13 @@ const Landing = ({ onScanSuccess, onReset }: { onScanSuccess: (data: ScanPhysica
             } else {
                 toast({ variant: 'destructive', title: 'Error', description: result.error });
             }
+        } catch(e) {
+            const error = e instanceof Error ? e.message : 'Failed to read the file.';
+            toast({ variant: 'destructive', title: 'Error', description: error });
+            
+        } finally {
             setIsLoading(false);
-        };
-        reader.onerror = () => {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to read the file.' });
-            setIsLoading(false);
-        };
+        }
 
         if (event.target) event.target.value = '';
     };
@@ -379,10 +415,8 @@ const AITools = ({ dispatch, participants }: { dispatch: React.Dispatch<BillActi
         if (!file) return;
 
         setIsLoading(tool);
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-            const dataUri = reader.result as string;
+        try {
+            const dataUri = await resizeImage(file, 1024);
             const result = tool === 'scan' ? await analyzeBillImage(dataUri) : await analyzeDigitalBill(dataUri);
 
             if (result.success) {
@@ -390,12 +424,12 @@ const AITools = ({ dispatch, participants }: { dispatch: React.Dispatch<BillActi
             } else {
                 toast({ variant: 'destructive', title: 'Error', description: result.error });
             }
-            setIsLoading(null);
-        };
-        reader.onerror = () => {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to read the file.' });
-            setIsLoading(null);
-        };
+        } catch(e) {
+            const error = e instanceof Error ? e.message : 'Failed to read the file.';
+            toast({ variant: 'destructive', title: 'Error', description: error });
+        } finally {
+             setIsLoading(null);
+        }
 
         if (event.target) event.target.value = '';
     };
