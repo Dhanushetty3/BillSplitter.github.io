@@ -58,42 +58,8 @@ Thanks!`;
     const doc = new jsPDF();
     const dateStr = new Date().toLocaleDateString();
 
-    const convertSvgToPng = (svgDataUrl: string): Promise<string> => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = svgDataUrl;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          // Upscale for better quality in PDF
-          canvas.width = img.width * 4;
-          canvas.height = img.height * 4;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const pngDataUrl = canvas.toDataURL("image/png");
-            resolve(pngDataUrl);
-          } else {
-            reject(new Error("Could not get canvas context to convert SVG."));
-          }
-        };
-        img.onerror = (err) => {
-          console.error("SVG to PNG conversion error:", err);
-          reject(new Error("Failed to load SVG image for PDF conversion."));
-        };
-      });
-    };
-
     // --- Logo ---
-    const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iNiIgZmlsbD0iIzAwQTNGRiIvPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNOCAxOEw2IDIwVjRoMTR2MTZsLTItMi0yIDItMi0yLTItMi0yIDItMi0yIi8+PC9zdmc+';
-    
-    let logoPngDataUrl: string;
-    try {
-      logoPngDataUrl = await convertSvgToPng(logoDataUrl);
-    } catch (error) {
-      console.error(error);
-      // Fallback if conversion fails, proceed without logo
-      logoPngDataUrl = '';
-    }
+    const logoPngDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAARwSURBVHhe7Z1/aFxVFMd/d1fRQuwFBbEJEUEKxYpgIyIYEbQLK42g2GghGIqCRkoLK4qNFAsFRbCIIiiKiCAiUKwEEUEUBB/EUCD4Ibu7+33OnJnL3Pvem7v3vTf3I/eDx31z733u+c255M65p0QikUgkEolEIpFIJBKJRCKRSCQSiUQikUikq0hYq52LpFoN2vV+VfVp9er5Xg207aCbrL2224dF53q9H6t+3aC/rD5v425vB6d6eL+8d8LKhKqS2qgH6zJqj6tX17tV1UvVj6vHq47W3N/6jSotlE+qT2pLajO1H5rW0d9d300fUf/c/z8aU4vD2R2qV2mNqFfVB/Rf5qBq998/vX+y7e9qY0b81hP99y/fH/cZl3c/s/6pD+2IapJNJV0/6V1vE/Wb2j9Vf11T/fGqg4v3/Y0q/u2Rj2h+gGg/n1Gv68R9W39p7qq/rG7338/5uMub9Vd1v/6G9rGqKbrK2tr6gO092m9qg6t/qf4pP+9GqQe9/uR1uY7H5P12vVNfdY0+b81jL+V1v7t2i9r/+6mN5V0x1/39m3c5+3/XvW8r0k+U9N/+6B+rY+pQ+qI6j9rNfUt1QW0V9W5aI5f0qL6+3rC2yK2X+qN7tPqT1+9j8U66H1o76S9tT3d6H0x/qH7w3M059V/11/R+1H+pPqve+o7+9h+q5+g+0/5mC6J2qu+uNf7qMeq/quvpG+lVNVz1Y/+z/X0x/qf7uW7r0U/Q2/vM1V9Uv1T/VD9dPa2tH5q+WlV4mqa7q335+26/n3pA7XF2mC6t/55/R/1v+g+z3p72vV95E4uM/W/+5h3f05GkL7Nq7D+3Xb+qT601/3k3h4V0f/0R/Xw3s3Wnvr1VdJutxW1J3V6/9b6mDtlxXVx/7339J+Xf29X+X763L/1sPVn/0vVFVH62c1Gv16z/371XfV3/2v1aNrf+8ncdjf+b+b9d/qOeqb6vD+n9+y6lW1t/Tf/a/P47E+/Lfrf2o3/e+1b31k37+Ld8f99W3da896w7pA2uX/Tf9t+2y/33a6+o7+i86pQ/t19+2jW87q0/r3v1/1V9rN/9/n6f+x+v1OqSbrB71uN5n3+tHqVbVV2sP6a/2r76n27D/1U/V+v63/pbfU39bd1WvW5P6gH9+hH9/T+/V9r/62+q5+rn6wLqlOqn/3/X+99kP/u1f+x+uP/2P1b9f//r/tbf2pX+X+q9b2/+21f+3pL71d9H/tqR+1s1qW2pP6xLqg+of/Xf/d630v1X/t6V+t6RerV/tL9Vf6/H1f39f/y3X+6/879D/+y86pUer/3fUo9Vv15SfrWn/6x/8v9cjf1B9vV/tv5d/V7/tL/+Xv/53/7d+l2vV730x//tP/7s1H5FIJBKJRCKRSKSU8h+480B22u11wwAAAABJRU5ErkJggg==';
 
     // --- Theme and Config ---
     const primaryColor = "#00A3FF"; // Matching the logo's blue
