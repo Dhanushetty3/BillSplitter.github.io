@@ -84,7 +84,7 @@ Thanks!`;
     };
 
     // --- Logo ---
-    const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iNiIgZmlsbD0iIzAwQTNGRiIvPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNNyA1aDEwYy41NSAwIDEgLjQ1IDEgMXYxM2wtMS41LTEuMjVMMTUgMTlsLTEuNS0xLjI1TDEyIDE5bC0xLjUtMS4yNUw5IDE5bC0xLjUtMS4yNUw2IDE5VjZjMC0uNTUuNDUtMSAxLTFaIi8+PC9zdmc+';
+    const logoDataUrl = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iNiIgZmlsbD0iIzAwQTNGRiIvPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNOCAxOEw2IDIwVjRoMTR2MTZsLTItMi0yIDItMi0yLTItMi0yIDItMi0yIi8+PC9zdmc+';
     
     let logoPngDataUrl: string;
     try {
