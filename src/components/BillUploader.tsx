@@ -215,7 +215,7 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {billImages.map((src, index) => (
               <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                <Image src={src} alt={`Bill page ${index + 1}`} fill className="object-cover" />
+                <Image src={src} alt={`Bill ${index + 1}`} fill className="object-cover" />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <Button variant="destructive" size="icon" className="h-9 w-9 rounded-full" onClick={() => removeImage(index)}>
                     <X className="w-5 h-5" />
@@ -230,7 +230,7 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
             className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 text-base rounded-full shadow-lg"
           >
             {loading ? <Loader2 className="animate-spin" /> : <ScanLine className="mr-2" />}
-            Analyze {billImages.length} Image{billImages.length > 1 ? 's' : ''}
+            {billImages.length === 1 ? `Split 1 Bill` : `Split ${billImages.length} Bills`}
           </Button>
         </div>
       )}
@@ -243,7 +243,7 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
           className="flex-1 h-11"
         >
           <Camera className="w-4 h-4 mr-2" />
-          {billImages.length > 0 ? 'Add Page' : 'Take a Pic'}
+          {billImages.length > 0 ? 'Add Bill' : 'Take a Pic'}
         </Button>
         
         <Button 
@@ -253,7 +253,7 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
           className="flex-1 border-primary/30 text-primary hover:bg-primary/5 h-11"
         >
           <Upload className="w-4 h-4 mr-2" />
-          {billImages.length > 0 ? 'Add Page' : 'Upload Bill'}
+          {billImages.length > 0 ? 'Add Bill' : 'Upload Bill'}
         </Button>
       </div>
       
