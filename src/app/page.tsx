@@ -667,7 +667,7 @@ export default function BillSplitter() {
                         <Scale className="w-16 h-16 text-primary mx-auto mb-6 opacity-80" />
                         <h3 className="text-2xl font-bold mb-3">Equal Split Active</h3>
                         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                          Divided equally among your <span className="font-bold text-foreground">{friends.length}</span> group members.
+                          Divided equally among your <span className="font-bold text-foreground">{friends.length}</span> group {friends.length === 1 ? 'member' : 'members'}.
                         </p>
                         {friends.length > 0 && (
                           <div className="mt-8 p-6 bg-primary/5 rounded-2xl inline-block border border-primary/10">
@@ -808,3 +808,5 @@ function PercentageInput({ value, onChange }: { value: number; onChange: (val: n
     />
   );
 }
+
+    
