@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
 import type { DemoBillData } from '@/app/actions';
+import { formatCurrency } from '@/lib/utils';
 
 export default function BillSplitter() {
   const [items, setItems] = useState<BillItem[]>([]);
@@ -330,7 +331,7 @@ export default function BillSplitter() {
       
       {/* Fixed Theme Toggle */}
       {(animationStage >= 2 || isBillUploaded) && (
-        <div className="absolute right-4 top-4 md:top-8 z-[60] animate-in fade-in zoom-in duration-[1s]">
+        <div className="absolute right-4 top-4 md:top-8 z-[60] animate-in fade-in zoom-in duration-1000">
           <Button 
             variant="outline" 
             size="icon" 
@@ -357,7 +358,7 @@ export default function BillSplitter() {
             </div>
             <DialogTitle className="text-2xl font-black text-center">Bill Analyzed!</DialogTitle>
             <DialogDescription className="text-center text-base pt-2">
-              We found <span className="font-bold text-foreground">{items.length} items</span> totaling <span className="font-bold text-foreground">₹{billMeta.subtotal.toFixed(2)}</span> at <span className="font-bold text-foreground">{restaurantName || "the restaurant"}</span>.
+              We found <span className="font-bold text-foreground">{items.length} items</span> totaling <span className="font-bold text-foreground">{formatCurrency(billMeta.subtotal)}</span> at <span className="font-bold text-foreground">{restaurantName || "the restaurant"}</span>.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 text-center">
@@ -486,7 +487,7 @@ export default function BillSplitter() {
 
               {showFullLayout && (
                 <>
-                  <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1.5s] transition-all hover:shadow-md">
+                  <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-1500">
                     <h3 className="text-lg font-headline font-bold flex items-center gap-2 mb-4">
                       <Receipt className="w-5 h-5 text-primary" />
                       Bill Summary
@@ -542,7 +543,7 @@ export default function BillSplitter() {
                       </div>
                       <div className="pt-3 border-t flex justify-between items-center">
                         <span className="font-bold text-foreground">Total</span>
-                        <span className="text-sm font-bold text-primary">₹{billTotal.toFixed(2)}</span>
+                        <span className="text-sm font-bold text-primary">{formatCurrency(billTotal)}</span>
                       </div>
                     </div>
                   </section>
@@ -597,7 +598,7 @@ export default function BillSplitter() {
                   </TabsContent>
 
                   <TabsContent value="assign" className="mt-0 focus-visible:outline-none space-y-6">
-                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-[1s]">
+                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-1000">
                       <Label className="text-xs font-bold uppercase text-muted-foreground mb-4 block tracking-widest">Split Method</Label>
                       <RadioGroup 
                         value={splitMode} 
@@ -629,7 +630,7 @@ export default function BillSplitter() {
                     </div>
 
                     {splitMode === 'item-wise' && (
-                      <div className="space-y-6 animate-in fade-in duration-[1s]">
+                      <div className="space-y-6 animate-in fade-in duration-1000">
                         <div className="flex items-center justify-between mb-2">
                           <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Items</h2>
                           <div className="flex gap-2">
@@ -662,7 +663,7 @@ export default function BillSplitter() {
                     )}
 
                     {splitMode === 'equal' && (
-                      <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-[1s]">
+                      <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-1000">
                         <Scale className="w-16 h-16 text-primary mx-auto mb-6 opacity-80" />
                         <h3 className="text-2xl font-bold mb-3">Equal Split Active</h3>
                         <p className="text-sm text-muted-foreground max-w-md mx-auto">
@@ -671,14 +672,14 @@ export default function BillSplitter() {
                         {friends.length > 0 && (
                           <div className="mt-8 p-6 bg-primary/5 rounded-2xl inline-block border border-primary/10">
                             <p className="text-xs uppercase font-bold text-primary/70 tracking-wider mb-2">Per Person</p>
-                            <p className="text-xl font-black text-primary">₹{(billTotal / friends.length).toFixed(2)}</p>
+                            <p className="text-xl font-black text-primary">{formatCurrency(billTotal / friends.length)}</p>
                           </div>
                         )}
                       </div>
                     )}
 
                     {splitMode === 'percentage' && (
-                      <div className="space-y-6 animate-in fade-in duration-[1s]">
+                      <div className="space-y-6 animate-in fade-in duration-1000">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Percentages</h2>
@@ -726,7 +727,7 @@ export default function BillSplitter() {
                     )}
 
                     {totalMismatch && (
-                      <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-[1s]">
+                      <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-1000">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle className="font-bold">
                           {splitMode === 'percentage' ? `${(100 - totalPercentage).toFixed(2)}% remaining` : "Split incomplete"}

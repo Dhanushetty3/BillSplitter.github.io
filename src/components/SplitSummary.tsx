@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { jsPDF } from "jspdf";
 import { WhatsappIcon } from './icons/WhatsappIcon';
 import { SmsIcon } from './icons/SmsIcon';
+import { formatCurrency } from '@/lib/utils';
 
 interface SplitSummaryProps {
   splits: SplitResult[];
@@ -23,7 +24,7 @@ interface SplitSummaryProps {
 
 export default function SplitSummary({ splits, tax, tip, total, restaurantName, hasError }: SplitSummaryProps) {
   const generateShareMessage = (res: SplitResult) => {
-    const itemsText = res.items.map(it => `• ${it.name}: Rs.${it.cost.toFixed(2)}`).join('\n');
+    const itemsText = res.items.map(it => `• ${it.name}: ${formatCurrency(it.cost)}`).join('\n');
     const greeting = `Hi ${res.friend}!`;
     const intro = restaurantName 
       ? `Here is your split from ${restaurantName} via BillSplitter:`
@@ -34,11 +35,11 @@ ${intro}
 
 ${itemsText}
 
-Subtotal: Rs.${res.subtotal.toFixed(2)}
-Tax Share: Rs.${res.taxShare.toFixed(2)}
-Tip Share: Rs.${res.tipShare.toFixed(2)}
+Subtotal: ${formatCurrency(res.subtotal)}
+Tax Share: ${formatCurrency(res.taxShare)}
+Tip Share: ${formatCurrency(res.tipShare)}
 -------------------
-Total Owed: Rs.${res.total.toFixed(2)}
+Total Owed: ${formatCurrency(res.total)}
 
 Thanks!`;
   };
@@ -156,7 +157,7 @@ Thanks!`;
             doc.rect(pageMargin, y - 6, contentWidth, 10, 'F');
         }
         doc.text(res.friend, pageMargin, y);
-        doc.text(`Rs. ${res.total.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
+        doc.text(formatCurrency(res.total), pageWidth - pageMargin, y, { align: 'right' });
         y += 10;
     });
 
@@ -169,7 +170,7 @@ Thanks!`;
     doc.setFontSize(14);
     doc.setTextColor(primaryColor);
     doc.text("GRAND TOTAL", pageWidth / 2, y);
-    doc.text(`Rs. ${total.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
+    doc.text(formatCurrency(total), pageWidth - pageMargin, y, { align: 'right' });
 
     drawFooter(currentPage, totalPages);
     currentPage++;
@@ -203,7 +204,7 @@ Thanks!`;
                     doc.rect(pageMargin, y - 6, contentWidth, 10, 'F');
                 }
                 doc.text(item.name, pageMargin, y);
-                doc.text(`Rs. ${item.cost.toFixed(2)}`, pageWidth - pageMargin, y, { align: 'right' });
+                doc.text(formatCurrency(item.cost), pageWidth - pageMargin, y, { align: 'right' });
                 y += 10;
             });
         } else {
@@ -225,15 +226,15 @@ Thanks!`;
         doc.setTextColor(textColor);
 
         doc.text("Subtotal:", summaryX, y, { align: 'right' });
-        doc.text(`Rs. ${res.subtotal.toFixed(2)}`, valueX, y, { align: 'right' });
+        doc.text(formatCurrency(res.subtotal), valueX, y, { align: 'right' });
         y += 7;
         
         doc.text("Tax Share:", summaryX, y, { align: 'right' });
-        doc.text(`Rs. ${res.taxShare.toFixed(2)}`, valueX, y, { align: 'right' });
+        doc.text(formatCurrency(res.taxShare), valueX, y, { align: 'right' });
         y += 7;
 
         doc.text("Tip Share:", summaryX, y, { align: 'right' });
-        doc.text(`Rs. ${res.tipShare.toFixed(2)}`, valueX, y, { align: 'right' });
+        doc.text(formatCurrency(res.tipShare), valueX, y, { align: 'right' });
         y += 7;
         
         doc.setDrawColor("#E5E7EB");
@@ -244,7 +245,7 @@ Thanks!`;
         doc.setFontSize(14);
         doc.setTextColor(primaryColor);
         doc.text("Total Owed:", summaryX, y, { align: 'right' });
-        doc.text(`Rs. ${res.total.toFixed(2)}`, valueX, y, { align: 'right' });
+        doc.text(formatCurrency(res.total), valueX, y, { align: 'right' });
 
         drawFooter(currentPage, totalPages);
         currentPage++;
@@ -338,7 +339,7 @@ Thanks!`;
                 {res.items.map((item, idx) => (
                   <div key={idx} className="flex justify-between text-sm items-start">
                     <span className="text-muted-foreground/80 font-medium max-w-[70%] break-words">{item.name}</span>
-                    <span className="font-bold shrink-0">Rs.${item.cost.toFixed(2)}</span>
+                    <span className="font-bold shrink-0">{formatCurrency(item.cost)}</span>
                   </div>
                 ))}
               </div>
@@ -346,21 +347,21 @@ Thanks!`;
               <div className="space-y-1.5 text-xs font-medium text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="text-foreground">Rs.${res.subtotal.toFixed(2)}</span>
+                  <span className="text-foreground">{formatCurrency(res.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax Share</span>
-                  <span className="text-foreground">Rs.${res.taxShare.toFixed(2)}</span>
+                  <span className="text-foreground">{formatCurrency(res.taxShare)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tip Share</span>
-                  <span className="text-foreground">Rs.${res.tipShare.toFixed(2)}</span>
+                  <span className="text-foreground">{formatCurrency(res.tipShare)}</span>
                 </div>
               </div>
               <div className="pt-2">
                 <div className="bg-primary/5 rounded-xl p-3 flex justify-between items-center border border-primary/10">
                   <span className="font-bold text-primary/80 text-xs uppercase tracking-wider">Owes</span>
-                  <span className="text-sm font-bold text-primary">Rs.${res.total.toFixed(2)}</span>
+                  <span className="text-sm font-bold text-primary">{formatCurrency(res.total)}</span>
                 </div>
               </div>
             </CardContent>
@@ -391,19 +392,18 @@ Thanks!`;
                 </div>
               </div>
               <h3 className="text-xl font-black flex items-center gap-1.5">
-                <span className="text-sm opacity-80">Rs.</span>
-                {total.toFixed(2)}
+                {formatCurrency(total)}
               </h3>
             </div>
             
             <div className="flex gap-8 border-t md:border-t-0 md:border-l border-white/20 pt-6 md:pt-0 md:pl-10 w-full md:w-auto justify-center md:justify-start">
               <div className="text-center">
                 <p className="text-primary-foreground/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">Total Tax</p>
-                <p className="font-bold text-sm">Rs.${tax.toFixed(2)}</p>
+                <p className="font-bold text-sm">{formatCurrency(tax)}</p>
               </div>
               <div className="text-center">
                 <p className="text-primary-foreground/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">Total Tip</p>
-                <p className="font-bold text-sm">Rs.${tip.toFixed(2)}</p>
+                <p className="font-bold text-sm">{formatCurrency(tip)}</p>
               </div>
             </div>
           </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BillItem } from '@/lib/bill-utils';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 
 interface ItemAssignerProps {
   items: BillItem[];
@@ -87,7 +88,7 @@ export default function ItemAssigner({
 
                     <div className="text-right shrink-0">
                         <p className="text-xs text-muted-foreground">Item Total</p>
-                        <p className="text-xl font-bold text-primary">₹{item.lineTotal.toFixed(2)}</p>
+                        <p className="text-xl font-bold text-primary">{formatCurrency(item.lineTotal)}</p>
                     </div>
                 </div>
 
