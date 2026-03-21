@@ -330,7 +330,7 @@ export default function BillSplitter() {
       
       {/* Fixed Theme Toggle */}
       {(animationStage >= 2 || isBillUploaded) && (
-        <div className="absolute right-4 top-4 md:top-8 z-[60] animate-in fade-in zoom-in duration-[1000ms]">
+        <div className="absolute right-4 top-4 md:top-8 z-[60] animate-in fade-in zoom-in duration-[1s]">
           <Button 
             variant="outline" 
             size="icon" 
@@ -344,7 +344,7 @@ export default function BillSplitter() {
 
       {/* Top Dynamic Spacer for centering */}
       <div className={cn(
-        "transition-all duration-[4000ms] ease-in-out transform-gpu",
+        "transition-all duration-[4s] ease-in-out transform-gpu",
         isCenteredLayout ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
       )} />
 
@@ -414,11 +414,11 @@ export default function BillSplitter() {
 
       {/* Header & Logo Section */}
       <div className={cn(
-        "transition-all duration-[4000ms] transform-gpu ease-in-out flex flex-col items-center justify-center w-full z-50",
+        "transition-all duration-[4s] transform-gpu ease-in-out flex flex-col items-center justify-center w-full z-50",
         isCenteredLayout ? "mb-0" : "h-auto mb-2"
       )}>
         <div className={cn(
-          "flex flex-col items-center transition-all duration-[4000ms] transform-gpu",
+          "flex flex-col items-center transition-all duration-[4s] transform-gpu",
           isCenteredLayout && animationStage < 2 ? "scale-110 md:scale-125" : "scale-100"
         )}>
           <div className={cn(
@@ -434,7 +434,7 @@ export default function BillSplitter() {
           </div>
           
           <p className={cn(
-            "mt-3 text-sm md:text-base text-muted-foreground font-medium text-center transition-all duration-[2000ms]",
+            "mt-3 text-sm md:text-base text-muted-foreground font-medium text-center transition-all duration-[2s]",
             animationStage >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           )}>
             Split the bill, not the friendship.
@@ -444,24 +444,24 @@ export default function BillSplitter() {
 
       {/* Main Content Reveal */}
       <div className={cn(
-        "transition-all duration-[4000ms] transform-gpu flex flex-col w-full",
+        "transition-all duration-[4s] transform-gpu flex flex-col w-full",
         animationStage < 2 && !isBillUploaded ? "opacity-0 pointer-events-none mt-0 h-0 overflow-hidden" : "opacity-100 translate-y-0 mt-4 h-auto"
       )}>
         
         {!isBillUploaded ? (
-          <div className="max-w-xl mx-auto w-full py-2 space-y-4 animate-in fade-in duration-[4000ms]">
+          <div className="max-w-xl mx-auto w-full py-2 space-y-4 animate-in fade-in duration-[4s]">
             <div className="bg-card rounded-3xl p-6 md:p-8 shadow-xl border border-border/50">
                <BillUploader onDataExtracted={onDataExtracted} isOnline={isOnline} />
             </div>
           </div>
         ) : (
           <div className={cn(
-            "animate-in fade-in duration-[2000ms]",
+            "animate-in fade-in duration-[2s]",
             showFullLayout ? "grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8" : "flex flex-col items-center"
           )}>
             <div className={cn(
               "w-full space-y-6",
-              showFullLayout ? "lg:col-span-4 animate-in slide-in-from-left-8 duration-[2000ms]" : "lg:max-w-lg"
+              showFullLayout ? "lg:col-span-4 animate-in slide-in-from-left-8 duration-[2s]" : "lg:max-w-lg"
             )}>
               <section id="group-members-section" className="bg-card rounded-2xl p-6 shadow-sm border border-border scroll-mt-24 transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
@@ -486,7 +486,7 @@ export default function BillSplitter() {
 
               {showFullLayout && (
                 <>
-                  <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1500ms] transition-all hover:shadow-md">
+                  <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1.5s] transition-all hover:shadow-md">
                     <h3 className="text-lg font-headline font-bold flex items-center gap-2 mb-4">
                       <Receipt className="w-5 h-5 text-primary" />
                       Bill Summary
@@ -562,7 +562,7 @@ export default function BillSplitter() {
             </div>
 
             {showFullLayout && (
-              <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-[2000ms]">
+              <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-[2s]">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 h-14 bg-card p-1 rounded-2xl shadow-sm border border-border mb-6">
                     <TabsTrigger value="scan" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white">
@@ -597,7 +597,7 @@ export default function BillSplitter() {
                   </TabsContent>
 
                   <TabsContent value="assign" className="mt-0 focus-visible:outline-none space-y-6">
-                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-[1000ms]">
+                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-[1s]">
                       <Label className="text-xs font-bold uppercase text-muted-foreground mb-4 block tracking-widest">Split Method</Label>
                       <RadioGroup 
                         value={splitMode} 
@@ -629,7 +629,7 @@ export default function BillSplitter() {
                     </div>
 
                     {splitMode === 'item-wise' && (
-                      <div className="space-y-6 animate-in fade-in duration-[1000ms]">
+                      <div className="space-y-6 animate-in fade-in duration-[1s]">
                         <div className="flex items-center justify-between mb-2">
                           <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Items</h2>
                           <div className="flex gap-2">
@@ -662,7 +662,7 @@ export default function BillSplitter() {
                     )}
 
                     {splitMode === 'equal' && (
-                      <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-[1000ms]">
+                      <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-[1s]">
                         <Scale className="w-16 h-16 text-primary mx-auto mb-6 opacity-80" />
                         <h3 className="text-2xl font-bold mb-3">Equal Split Active</h3>
                         <p className="text-sm text-muted-foreground max-w-md mx-auto">
@@ -678,7 +678,7 @@ export default function BillSplitter() {
                     )}
 
                     {splitMode === 'percentage' && (
-                      <div className="space-y-6 animate-in fade-in duration-[1000ms]">
+                      <div className="space-y-6 animate-in fade-in duration-[1s]">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Percentages</h2>
@@ -726,7 +726,7 @@ export default function BillSplitter() {
                     )}
 
                     {totalMismatch && (
-                      <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-[1000ms]">
+                      <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-[1s]">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle className="font-bold">
                           {splitMode === 'percentage' ? `${(100 - totalPercentage).toFixed(2)}% remaining` : "Split incomplete"}
@@ -773,7 +773,7 @@ export default function BillSplitter() {
 
       {/* Bottom Dynamic Spacer for centering */}
       <div className={cn(
-        "transition-all duration-[4000ms] ease-in-out transform-gpu",
+        "transition-all duration-[4s] ease-in-out transform-gpu",
         isCenteredLayout ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
       )} />
 
