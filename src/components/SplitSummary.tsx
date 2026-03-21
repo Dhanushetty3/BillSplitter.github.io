@@ -58,6 +58,8 @@ Thanks!`;
   const generatePDF = async () => {
     const doc = new jsPDF();
     const dateStr = new Date().toLocaleDateString();
+    
+    const logoSvgDataUrl = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiByeD0iNDAiIGZpbGw9IiMwMEEzRkYiLz4KPHBhdGggZD0iTTcyIDUySDE4NFYyMDRMMTc0IDE5NEwxNjQgMjA0TDE1NCAxOTRMMTQ0IDIwNEwxMzQgMTk0TDEyNCAyMDRMMTE0IDE5NEwxMDQgMjA0TDk0IDE5NEw4NCAyMDRMNzIgMTk0VjUyWiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTEyOCA4OFYxMDBNMTI4IDE0OFYxNjBNMTQ2IDEwNkMxNDYgOTkuMzcyNiAxMzguMTggOTQgMTI4IDk0QzExOS4wMTIgOTQgMTEwIDk5LjM3MjYgMTEwIDEwNkMxMTAgMTEwLjQzOSAxMTMuMTgxIDExNC4xMyAxMTggMTE2LjI1NEYxMTAgMTQyQzExMCAxNDguNjI3IDExNy44MiAxNTQgMTI4IDE1NEMxMzYuOTg4IDE1NCAxNDYgMTQ4LjYyNyAxNDYgMTQyQzE0NiAxMzcuNTYxIDE0Mi44MTkgMTMzLjg3IDEzOCAxMzEuNzQ1IiBzdHJva2U9IiMwMEEzRkYiIHN0cm9rZS13aWR0aD0iMTQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K";
 
     // --- Theme and Config ---
     const primaryColor = "#00A3FF";
@@ -70,29 +72,9 @@ Thanks!`;
 
     // --- Helper Functions ---
     const drawHeader = (title: string) => {
-        // Draw blue rounded square for the logo background
-        doc.setFillColor(primaryColor);
-        doc.roundedRect(pageMargin, 18, 10, 10, 2, 2, 'F');
-        
-        // Draw the white receipt icon using vector graphics
-        doc.setDrawColor("#FFFFFF");
-        doc.setLineWidth(0.4);
-
-        const iconX = pageMargin + 1.5;
-        const iconY = 18 + 1.5;
-        const iconSize = 7;
-        const scale = iconSize / 24;
-
-        const transformX = (x: number) => (x * scale) + iconX;
-        const transformY = (y: number) => (y * scale) + iconY;
-
-        // Draw receipt outline (a rectangle)
-        doc.rect(transformX(4), transformY(2), 16 * scale, 20 * scale, 'S');
-
-        // Draw lines inside receipt
-        doc.line(transformX(8), transformY(6), transformX(16), transformY(6));
-        doc.line(transformX(8), transformY(10), transformX(16), transformY(10));
-        doc.line(transformX(8), transformY(14), transformX(12), transformY(14));
+        if (logoSvgDataUrl) {
+          doc.addImage(logoSvgDataUrl, 'SVG', pageMargin, 18, 10, 10);
+        }
         
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
