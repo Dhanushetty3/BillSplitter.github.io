@@ -58,7 +58,7 @@ Thanks!`;
     const doc = new jsPDF();
     const dateStr = new Date().toLocaleDateString();
 
-    const logoPngDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAASHSURBVHja7Z1BiC9nGMefM5MxtYyIhChpUpWybBlpYSYtjIWMgpGFyMrCgSwYWdhoNolJ2SiKJJmYlUUKLURs+f7/6j1n9p73Pc/7vPfrPtd5fN/P897P+TzP+zvPOa/3XFxcXBwnwIYFwDpgDTAOmAVYBawD9gD7gL3ACeBMMAoYDqwHvgf2gfeBYcBV4BwQJ+gLdAVaA/tAL9Af6As0BLqL/0B/oB/QF/QJugL9gf5AX6Ap0F9oLLQKGgb9hdaA5kCDof/QBmgKNBo6DR0FjYb+QhOgNdBUaBw0AgoDHYPGQEtBo6A50EhoCjQCGgKNgaaAQ0BxoAVQFDQAGgFNAE2AgoBBQEVAo6AhoC5QADgN7AGeB2YBD4EHwMPAfeAZ4D1wCfgQXAe+Bw4Ct4HZwHvgU/A8cBSYC/wG/B7YAhwGdgKHge/AV8AnwKXA9cA14DvgM+AL4Bvgb+AP4DfgM+Ab4GvgG+Ab4BvgS+Bb4FvgC+Bb4FvgC+Br4FvgC+Ar4FvgC+Ar4FvgC+Cr4FvgC+Cr4FvgC+C74FvgC+C74FvgC+B74FvgC+B74FvgC+CL4FvgC+BL4FvgC+Dr4FvgC+Cr4FvgC+Bb4FvgC+Bb4FvgC+Bb4FvgC+BL4FvgC+Bb4FvgC+Cr4FvgC+Ar4FvgC+Cr4FvgC+B74FvgC+B74FvgC+B74FvgC+AL4FvgC+Ar4FvgC+Ab4FvgC+Bb4FvgC+BL4FvgC+BL4FvgC+Ab4GvgC+Cr4FvgC+Ar4FvgC+Bb4FvgC+BL4FvgC+Dr4FvgC+Bb4FvgC+AL4FvgC+Bb4FvgC+Ab4FvgC+Cr4FvgC+CL4FvgC+Bb4FvgC+Bb4FvgC+Ar4FvgC+Bb4FvgC+Br4FvgC+Ar4FvgC+Ab4FvgC+B74FvgC+Bb4FvgC+Ab4FvgC+B74FvgC+B74FvgC+Ar4FvgC+Ar4FvgC+Ab4FvgC+Ab4FvgC+Ab4FvgC+BL4FvgC+BL4FvgC+Ar4FvgC+Br4FvgC+Ab4FvgC+Bb4FvgC+Bb4FvgC+Bb4FvgC+B74FvgC+B74FvgC+Bb4FvgC+Bb4FvgC+Bb4FvgC+CL4FvgC+B74FvgC+Bb4FvgC+Bb4FvgC+Ab4FvgC+Ar4FvgC+Ar4FvgC+Cr4FvgC+CL4FvgC+BL4FvgC+Dr4FvgC+Ar4FvgC+Ab4FvgC+AL4FvgC+Bb4FvgC+AL4FvgC+Ab4GvgC+CL4FvgC+BL4FvgC+Ar4FvgC+Br4FvgC+B74FvgC+Ab4FvgC+B74FvgC+Bb4FvgC+Ab4FvgC+Bb4FvgC+B74FvgC+AL4FvgC+Bb4FvgC+Cr4FvgC+Bb4FvgC+CL4FvgC+Bb4FvgC+Br4FvgC+Ab4FvgC+Bb4FvgC+Ab4FvgC+Bb4FvgC+B74FvgC+B74FvgC+Ab4FvgC+Ab4FvgC+CL4FvgC+AL4FvgC+Bb4FvgC+Ab4FvgC+Ar4FvgC+B74FvgC+Cr4FvgC+Ab4FvgC+Bb4FvgC+Dr4FvgC+Bb4FvgC+Ab4FvgC+Ab4FvgC+Ab4FvgC+B74FvgC+BL4FvgC+Bb4FvgC+BL4FvgC+Bb4FvgC+Ab4FvgC+Bb4FvgC+AL4FvgC+CL4FvgC+Ab4FvgC+Bb4FvgC+Bb4FvgC+Dr4FvgC+B74FvgC+Ar4FvgC+Bb4FvgC+Bb4FvgC+Bb4FvgC+Bb4FvgC+B74FvgC+Bb4FvgC+B74FvgC+Ab4FvgC+BL4FvgC+B74FvgC+Ab4FvgC+Bb4FvgC+CL4FvgC+CL4FvgC+BL4FvgC+BL4FvgC+Ab4FvgC+Br4FvgC+Br4FvgC+Ab4FvgC+Ab4FvgC+Ab4FvgC+B74FvgC+Bb4FvgC+B74FvgC+Br4FvgC+Cr4FvgC+AL4FvgC+Ab4FvgC+AL4FvgC+AL4FvgC+Br4FvgC+Cr4FvgC+B74FvgC+A0sBlYCbwFvgCeA/cB34BfgAHAZ+BPYBjwK7gYvAM+A9cAa4EzwP7AQOBiGAceAacAn4BdgFXAdOA9cAq4D1gHrgF1AH7AFWB9YA64A1wAYcGBcXFxevwH8AL2Pq2tiiWkAAAAASUVORK5CYII=';
+    const receiptIconPngDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAACv0lEQVR4nO2azUvUURjH5w/BFiwt8h8IFhaE2hQELQoNWrRFa0W0KBEUFRQthAVtKkYLgoiA4AMVBEFEUHCFYkEa6gfRQguzCMtMvuPMO3Pe58y8Nx84wDPzzr3v+/z4zr07884hISEhISEhISEhIdGBSqVCn8dDqVRCEARsNpvcbrf3QSAQCILFYiEWi3U/MIVCIZvN9p5fIpGIxWLB5/MNhUJJpVLfH9i2zWq14PF4xGIxbDabyWQSm82WTCaVSuW+PYRCoXg8LnK5XCKRSAAAgM/nA4PBECqVikjE4/GYTqdCoVCsVisZDAar1SoQCCSSyCgUCoFA4D2CCoVCGIbJ5XIAkMlkEIlECoVCLBZLJpOZTCYEggCOI9/3i8UilUolnU6L5XLJ5/MMwySRSCaTSafT6XQ6sVgMhmGgKAoIgiqVCsBmsyEIAhRFv+/f3sFgUFEUBoMBruvG4/GgKAoA0HVFURSdTgdQFAUAuK7LZrMA4Lruer1Wq9VutyubzVzXlUgk/K+lUqlwOGx9f3d3d5fNZgEAuq67rqvValUqFc/zHMfRNO0/QavVWiwWn+kZDAZxHJPJpHA4zHFcV1fXp3tC27bX9aVSKZxO56d7gK7rfr//l6+uroqiaLPZ/KYaDAaxWEwymeS6LhaL5Xq9mqYpGo0mk8lEIhEMhgCCIFKptFgsn+/AcrkcDAbFYhEulwtRFGEYJp/P+/c+n4/L5RIOh6Ver4vF4uFw+D1E0zQcx3q9Hr7vU6lUbDZbqVQuFosghkAgUOqD+Xw+lUolnU4Hg0Gv10s6na7X65FIBADL5XJd18PhgMViAQDe7/f3+4vF4kQikXw+LxQKAQCCIMzlcgCAy+VCpVKdTudyudy/r7qu4ziGYfB9f7PZbDabfr9/mOSEhISEhISEhISEhETBfgB2Xn4U7Wz/JwAAAABJRU5ErkJggg==';
 
     // --- Theme and Config ---
     const primaryColor = "#00A3FF";
@@ -71,14 +71,16 @@ Thanks!`;
 
     // --- Helper Functions ---
     const drawHeader = (title: string) => {
-        if (logoPngDataUrl) {
-          doc.addImage(logoPngDataUrl, 'PNG', pageMargin, 18, 10, 10);
-        }
+        // Draw blue rounded square for the logo background
+        doc.setFillColor(primaryColor);
+        doc.roundedRect(pageMargin, 18, 10, 10, 2, 2, 'F');
+        // Overlay the white receipt icon
+        doc.addImage(receiptIconPngDataUrl, 'PNG', pageMargin + 1.5, 18 + 1.5, 7, 7);
         
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
         
-        const startX = pageMargin + (logoPngDataUrl ? 14 : 0);
+        const startX = pageMargin + 14;
         
         doc.setTextColor(textColor);
         doc.text("Bill", startX, 25);
