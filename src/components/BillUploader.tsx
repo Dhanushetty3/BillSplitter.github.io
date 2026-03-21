@@ -242,7 +242,7 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
           className="flex-1 h-11"
         >
           <Camera className="w-4 h-4 mr-2" />
-          {billImages.length > 0 ? 'Add Pic' : 'Take a Pic'}
+          {billImages.length > 0 ? 'Add More' : 'Take a Pic'}
         </Button>
         
         <Button 
@@ -252,7 +252,7 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
           className="flex-1 border-primary/30 text-primary hover:bg-primary/5 h-11"
         >
           <Upload className="w-4 h-4 mr-2" />
-          Upload Bill
+          {billImages.length > 0 ? 'Upload More' : 'Upload Bill'}
         </Button>
       </div>
       
