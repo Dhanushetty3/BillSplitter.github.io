@@ -9,6 +9,12 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 export const metadata: Metadata = {
   title: 'BillSplitter',
   description: 'Split the bill, not the friendship.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/logo.svg',
+    apple: '/logo.svg',
+  },
+  themeColor: '#00A3FF',
 };
 
 export default function RootLayout({

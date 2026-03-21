@@ -1,0 +1,16 @@
+{
+  "name": "BillSplitter",
+  "short_name": "BillSplitter",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#00A3FF",
+  "background_color": "#EDF1F4",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}
