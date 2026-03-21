@@ -58,8 +58,6 @@ Thanks!`;
     const doc = new jsPDF();
     const dateStr = new Date().toLocaleDateString();
 
-    const receiptIconPngDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAACv0lEQVR4nO2azUvUURjH5w/BFiwt8h8IFhaE2hQELQoNWrRFa0W0KBEUFRQthAVtKkYLgoiA4AMVBEFEUHCFYkEa6gfRQguzCMtMvuPMO3Pe58y8Nx84wDPzzr3v+/z4zr07884hISEhISEhISEhIdGBSqVCn8dDqVRCEARsNpvcbrf3QSAQCILFYiEWi3U/MIVCIZvN9p5fIpGIxWLB5/MNhUJJpVLfH9i2zWq14PF4xGIxbDabyWQSm82WTCaVSuW+PYRCoXg8LnK5XCKRSAAAgM/nA4PBECqVikjE4/GYTqdCoVCsVisZDAar1SoQCCSSyCgUCoFA4D2CCoVCGIbJ5XIAkMlkEIlECoVCLBZLJpOZTCYEggCOI9/3i8UilUolnU6L5XLJ5/MMwySRSCaTSafT6XQ6sVgMhmGgKAoIgiqVCsBmsyEIAhRFv+/f3sFgUFEUBoMBruvG4/GgKAoA0HVFURSdTgdQFAUAuK7LZrMA4Lruer1Wq9VutyubzVzXlUgk/K+lUqlwOGx9f3d3d5fNZgEAuq67rqvValUqFc/zHMfRNO0/QavVWiwWn+kZDAZxHJPJpHA4zHFcV1fXp3tC27bX9aVSKZxO56d7gK7rfr//l6+uroqiaLPZ/KYaDAaxWEwymeS6LhaL5Xq9mqYpGo0mk8lEIhEMhgCCIFKptFgsn+/AcrkcDAbFYhEulwtRFGEYJp/P+/c+n4/L5RIOh6Ver4vF4uFw+D1E0zQcx3q9Hr7vU6lUbDZbqVQuFosghkAgUOqD+Xw+lUolnU4Hg0Gv10s6na7X65FIBADL5XJd18PhgMViAQDe7/f3+4vF4kQikXw+LxQKAQCCIMzlcgCAy+VCpVKdTudyudy/r7qu4ziGYfB9f7PZbDabfr9/mOSEhISEhISEhISEhETBfgB2Xn4U7Wz/JwAAAABJRU5ErkJggg==';
-
     // --- Theme and Config ---
     const primaryColor = "#00A3FF";
     const textColor = "#1F2937"; // gray-800
@@ -74,8 +72,26 @@ Thanks!`;
         // Draw blue rounded square for the logo background
         doc.setFillColor(primaryColor);
         doc.roundedRect(pageMargin, 18, 10, 10, 2, 2, 'F');
-        // Overlay the white receipt icon
-        doc.addImage(receiptIconPngDataUrl, 'PNG', pageMargin + 1.5, 18 + 1.5, 7, 7);
+        
+        // Draw the white receipt icon using vector graphics
+        doc.setDrawColor("#FFFFFF");
+        doc.setLineWidth(0.4);
+
+        const iconX = pageMargin + 1.5;
+        const iconY = 18 + 1.5;
+        const iconSize = 7;
+        const scale = iconSize / 24;
+
+        const transformX = (x: number) => (x * scale) + iconX;
+        const transformY = (y: number) => (y * scale) + iconY;
+
+        // Draw receipt outline (a rectangle)
+        doc.rect(transformX(4), transformY(2), 16 * scale, 20 * scale, 'S');
+
+        // Draw lines inside receipt
+        doc.line(transformX(8), transformY(6), transformX(16), transformY(6));
+        doc.line(transformX(8), transformY(10), transformX(16), transformY(10));
+        doc.line(transformX(8), transformY(14), transformX(12), transformY(14));
         
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
