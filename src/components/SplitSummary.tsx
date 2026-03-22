@@ -59,6 +59,14 @@ Thanks!`;
     const doc = new jsPDF();
     const dateStr = new Date().toLocaleDateString();
     
+    // PDF-safe currency formatter to avoid issues with special characters in default fonts.
+    const formatCurrencyForPdf = (amount: number) => {
+      return 'Rs. ' + new Intl.NumberFormat('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(amount);
+    };
+
     // --- Theme and Config ---
     const primaryColor = "#00A3FF";
     const textColor = "#1F2937"; // gray-800
@@ -167,7 +175,7 @@ Thanks!`;
             doc.rect(pageMargin, y - 6, contentWidth, 10, 'F');
         }
         doc.text(res.friend, pageMargin, y);
-        doc.text(formatCurrency(res.total), pageWidth - pageMargin, y, { align: 'right' });
+        doc.text(formatCurrencyForPdf(res.total), pageWidth - pageMargin, y, { align: 'right' });
         y += 10;
     });
 
@@ -180,7 +188,7 @@ Thanks!`;
     doc.setFontSize(14);
     doc.setTextColor(primaryColor);
     doc.text("GRAND TOTAL", pageWidth / 2, y);
-    doc.text(formatCurrency(total), pageWidth - pageMargin, y, { align: 'right' });
+    doc.text(formatCurrencyForPdf(total), pageWidth - pageMargin, y, { align: 'right' });
 
     drawFooter(currentPage, totalPages);
     currentPage++;
@@ -214,7 +222,7 @@ Thanks!`;
                     doc.rect(pageMargin, y - 6, contentWidth, 10, 'F');
                 }
                 doc.text(item.name, pageMargin, y);
-                doc.text(formatCurrency(item.cost), pageWidth - pageMargin, y, { align: 'right' });
+                doc.text(formatCurrencyForPdf(item.cost), pageWidth - pageMargin, y, { align: 'right' });
                 y += 10;
             });
         } else {
@@ -236,15 +244,15 @@ Thanks!`;
         doc.setTextColor(textColor);
 
         doc.text("Subtotal:", summaryX, y, { align: 'right' });
-        doc.text(formatCurrency(res.subtotal), valueX, y, { align: 'right' });
+        doc.text(formatCurrencyForPdf(res.subtotal), valueX, y, { align: 'right' });
         y += 7;
         
         doc.text("Tax Share:", summaryX, y, { align: 'right' });
-        doc.text(formatCurrency(res.taxShare), valueX, y, { align: 'right' });
+        doc.text(formatCurrencyForPdf(res.taxShare), valueX, y, { align: 'right' });
         y += 7;
 
         doc.text("Tip Share:", summaryX, y, { align: 'right' });
-        doc.text(formatCurrency(res.tipShare), valueX, y, { align: 'right' });
+        doc.text(formatCurrencyForPdf(res.tipShare), valueX, y, { align: 'right' });
         y += 7;
         
         doc.setDrawColor("#E5E7EB");
@@ -255,7 +263,7 @@ Thanks!`;
         doc.setFontSize(14);
         doc.setTextColor(primaryColor);
         doc.text("Total Owed:", summaryX, y, { align: 'right' });
-        doc.text(formatCurrency(res.total), valueX, y, { align: 'right' });
+        doc.text(formatCurrencyForPdf(res.total), valueX, y, { align: 'right' });
 
         drawFooter(currentPage, totalPages);
         currentPage++;
