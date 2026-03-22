@@ -349,7 +349,7 @@ Thanks!`;
                 {res.items.map((item, idx) => (
                   <div key={idx} className="flex justify-between text-sm items-start">
                     <span className="text-muted-foreground/80 font-medium max-w-[70%] break-words">{item.name}</span>
-                    <span className="font-bold shrink-0">{formatCurrency(item.cost)}</span>
+                    <span className="font-bold shrink-0 tabular-nums">{formatCurrency(item.cost)}</span>
                   </div>
                 ))}
               </div>
@@ -357,21 +357,21 @@ Thanks!`;
               <div className="space-y-1.5 text-xs font-medium text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="text-foreground">{formatCurrency(res.subtotal)}</span>
+                  <span className="text-foreground tabular-nums">{formatCurrency(res.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax Share</span>
-                  <span className="text-foreground">{formatCurrency(res.taxShare)}</span>
+                  <span className="text-foreground tabular-nums">{formatCurrency(res.taxShare)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tip Share</span>
-                  <span className="text-foreground">{formatCurrency(res.tipShare)}</span>
+                  <span className="text-foreground tabular-nums">{formatCurrency(res.tipShare)}</span>
                 </div>
               </div>
               <div className="pt-2">
                 <div className="bg-primary/5 rounded-xl p-3 flex justify-between items-center border border-primary/10">
                   <span className="font-bold text-primary/80 text-xs uppercase tracking-wider">Owes</span>
-                  <span className="text-sm font-bold text-primary">{formatCurrency(res.total)}</span>
+                  <span className="text-sm font-bold text-primary tabular-nums">{formatCurrency(res.total)}</span>
                 </div>
               </div>
             </CardContent>
@@ -401,7 +401,7 @@ Thanks!`;
                   </div>
                 </div>
               </div>
-              <h3 className="text-xl font-black flex items-center gap-1.5">
+              <h3 className="text-xl font-black flex items-center gap-1.5 tabular-nums">
                 {formatCurrency(total)}
               </h3>
             </div>
@@ -409,11 +409,11 @@ Thanks!`;
             <div className="flex gap-8 border-t md:border-t-0 md:border-l border-white/20 pt-6 md:pt-0 md:pl-10 w-full md:w-auto justify-center md:justify-start">
               <div className="text-center">
                 <p className="text-primary-foreground/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">Total Tax</p>
-                <p className="font-bold text-sm">{formatCurrency(tax)}</p>
+                <p className="font-bold text-sm tabular-nums">{formatCurrency(tax)}</p>
               </div>
               <div className="text-center">
                 <p className="text-primary-foreground/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-1">Total Tip</p>
-                <p className="font-bold text-sm">{formatCurrency(tip)}</p>
+                <p className="font-bold text-sm tabular-nums">{formatCurrency(tip)}</p>
               </div>
             </div>
           </div>
@@ -422,5 +422,3 @@ Thanks!`;
     </div>
   );
 }
-
-    

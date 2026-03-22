@@ -358,7 +358,7 @@ export default function BillSplitter() {
             </div>
             <DialogTitle className="text-2xl font-black text-center">Bill Analyzed!</DialogTitle>
             <DialogDescription className="text-center text-base pt-2">
-              We found <span className="font-bold text-foreground">{items.length} items</span> totaling <span className="font-bold text-foreground">{formatCurrency(billMeta.subtotal)}</span> at <span className="font-bold text-foreground">{restaurantName || "the restaurant"}</span>.
+              We found <span className="font-bold text-foreground">{items.length} items</span> totaling <span className="font-bold text-foreground tabular-nums">{formatCurrency(billMeta.subtotal)}</span> at <span className="font-bold text-foreground">{restaurantName || "the restaurant"}</span>.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 text-center">
@@ -543,7 +543,7 @@ export default function BillSplitter() {
                       </div>
                       <div className="pt-3 border-t flex justify-between items-center">
                         <span className="font-bold text-foreground">Total</span>
-                        <span className="text-sm font-bold text-primary">{formatCurrency(billTotal)}</span>
+                        <span className="text-sm font-bold text-primary tabular-nums">{formatCurrency(billTotal)}</span>
                       </div>
                     </div>
                   </section>
@@ -672,7 +672,7 @@ export default function BillSplitter() {
                         {friends.length > 0 && (
                           <div className="mt-8 p-6 bg-primary/5 rounded-2xl inline-block border border-primary/10">
                             <p className="text-xs uppercase font-bold text-primary/70 tracking-wider mb-2">Per Person</p>
-                            <p className="text-xl font-black text-primary">{formatCurrency(billTotal / friends.length)}</p>
+                            <p className="text-xl font-black text-primary tabular-nums">{formatCurrency(billTotal / friends.length)}</p>
                           </div>
                         )}
                       </div>

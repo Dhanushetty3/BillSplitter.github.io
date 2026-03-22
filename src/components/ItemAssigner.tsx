@@ -88,7 +88,7 @@ export default function ItemAssigner({
 
                     <div className="text-right shrink-0">
                         <p className="text-xs text-muted-foreground">Item Total</p>
-                        <p className="text-xl font-bold text-primary">{formatCurrency(item.lineTotal)}</p>
+                        <p className="text-xl font-bold text-primary tabular-nums">{formatCurrency(item.lineTotal)}</p>
                     </div>
                 </div>
 
