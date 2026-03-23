@@ -3,4 +3,4 @@ config();
 
 import '@/ai/flows/scan-physical-bill-flow.ts';
 import '@/ai/flows/upload-digital-bill.ts';
-import '@/ai/flows/add-items-with-natural-language.ts';
+import '@/ai/flows/add-items-with-natural-language-flow.ts';

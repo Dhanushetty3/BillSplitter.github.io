@@ -1,6 +1,6 @@
 'use client';
 
-import { analyzeBillImage as analyzeBillImageFlow, ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
+import { extractBillItems as analyzeBillImageFlow, ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 import { uploadDigitalBill as uploadDigitalBillFlow, UploadDigitalBillOutput } from '@/ai/flows/upload-digital-bill';
 import { addItemsWithNaturalLanguage as addItemsWithNaturalLanguageFlow, AddItemsWithNaturalLanguageOutput } from '@/ai/flows/add-items-with-natural-language-flow';
 
