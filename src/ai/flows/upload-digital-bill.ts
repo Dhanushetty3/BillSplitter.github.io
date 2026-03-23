@@ -41,7 +41,7 @@ export async function uploadDigitalBill(input: UploadDigitalBillInput): Promise<
 
 const parseBillPrompt = ai.definePrompt({
   name: 'parseBillPrompt',
-  model: 'googleai/gemini-pro',
+  model: 'gemini-1.0-pro',
   input: { schema: UploadDigitalBillInputSchema },
   output: { schema: UploadDigitalBillOutputSchema },
   prompt: `You are an expert at parsing financial documents. Your task is to extract all relevant information from the provided digital bill (which could be an image or a PDF) and structure it into a JSON object.

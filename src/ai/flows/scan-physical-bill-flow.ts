@@ -45,7 +45,7 @@ export async function scanPhysicalBill(input: ScanPhysicalBillInput): Promise<Sc
 
 const prompt = ai.definePrompt({
   name: 'scanPhysicalBillPrompt',
-  model: 'googleai/gemini-pro',
+  model: 'gemini-1.0-pro',
   input: {schema: ScanPhysicalBillInputSchema},
   output: {schema: ScanPhysicalBillOutputSchema},
   prompt: `You are an expert at extracting structured information from images of physical receipts. Your task is to analyze the provided image and extract bill details according to the specified JSON schema.
