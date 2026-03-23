@@ -18,6 +18,7 @@ export async function addItemsWithNaturalLanguage(input: AddItemsWithNaturalLang
 
 const addItemsPrompt = ai.definePrompt({
   name: 'addItemsWithNaturalLanguagePrompt',
+  model: 'googleai/gemini-1.5-flash',
   input: { schema: AddItemsWithNaturalLanguageInputSchema },
   output: { schema: AddItemsWithNaturalLanguageOutputSchema },
   prompt: `You are an expert at parsing natural language to structure data.

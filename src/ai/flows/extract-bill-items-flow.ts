@@ -17,6 +17,7 @@ export async function extractBillItems(input: ExtractBillItemsInput): Promise<Ex
 
 const extractPrompt = ai.definePrompt({
   name: 'extractBillItemsPrompt',
+  model: 'googleai/gemini-1.5-flash',
   input: { schema: ExtractBillItemsInputSchema },
   output: { schema: ExtractBillItemsOutputSchema },
   prompt: `You are an expert bill reader. Analyze the provided bill image and extract the following information in the specified JSON format.
