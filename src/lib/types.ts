@@ -9,23 +9,30 @@ export const BillItemSchemaForAI = z.object({
     price: z.number().describe('The price of a single unit of the item.'),
     lineTotal: z.number().describe('The total price for the item line (quantity * price).'),
 });
-  
+
 // From add-items-with-natural-language-flow.ts
 export const AddItemsWithNaturalLanguageInputSchema = z.object({
     naturalLanguageInput: z.string().describe('A string describing items to add, e.g., "2 burgers at 10 each, 1 fries at 5".'),
-    participants: z.array(z.object({name: z.string()})).describe('A list of participants who can be assigned to items.'),
+    participants: z.array(z.string()).describe('A list of participant names who can be assigned to items.'),
 });
 export type AddItemsWithNaturalLanguageInput = z.infer<typeof AddItemsWithNaturalLanguageInputSchema>;
-  
+
 export const AddItemsWithNaturalLanguageOutputSchema = z.object({
-    items: z.array(BillItemSchemaForAI).describe('A list of items parsed from the natural language input.'),
+    items: z.array(
+        z.object({
+            description: z.string(),
+            amount: z.number(),
+            paidBy: z.string(),
+            splitAmong: z.array(z.string()),
+        })
+    ),
 });
 export type AddItemsWithNaturalLanguageOutput = z.infer<typeof AddItemsWithNaturalLanguageOutputSchema>;
 
 
 // From extract-bill-items-flow.ts
 export const ExtractBillItemsInputSchema = z.object({
-    billImage: z.string().describe("A photo of a restaurant bill, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+    photoDataUri: z.string().describe("A photo of a restaurant bill, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type ExtractBillItemsInput = z.infer<typeof ExtractBillItemsInputSchema>;
   
@@ -50,6 +57,47 @@ export const GenerateDemoBillOutputSchema = z.object({
     participants: z.array(z.string()).describe('A list of 2-3 fictional participant names (e.g., Alice, Bob).'),
 });
 export type GenerateDemoBillOutput = z.infer<typeof GenerateDemoBillOutputSchema>;
+
+
+// From scan-physical-bill-flow.ts
+export const ScanPhysicalBillInputSchema = z.object({
+    photoDataUri: z.string().describe("A photo of a physical bill, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+});
+export type ScanPhysicalBillInput = z.infer<typeof ScanPhysicalBillInputSchema>;
+
+export const ScanPhysicalBillOutputSchema = z.object({
+    placeOfTransaction: z.string().optional(),
+    date: z.string().optional(),
+    items: z.array(z.object({
+        description: z.string(),
+        amount: z.number(),
+    })),
+    subtotal: z.number(),
+    tax: z.number(),
+    tip: z.number(),
+    total: z.number(),
+});
+export type ScanPhysicalBillOutput = z.infer<typeof ScanPhysicalBillOutputSchema>;
+
+// From upload-digital-bill.ts
+export const UploadDigitalBillInputSchema = z.object({
+    billDataUri: z.string().describe("A digital bill file (image or PDF), as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+});
+export type UploadDigitalBillInput = z.infer<typeof UploadDigitalBillInputSchema>;
+
+export const UploadDigitalBillOutputSchema = z.object({
+    place: z.string(),
+    subtotal: z.number(),
+    tax: z.number(),
+    tip: z.number(),
+    total: z.number(),
+    items: z.array(z.object({
+        name: z.string(),
+        amount: z.number(),
+    })),
+    participants: z.array(z.string()),
+});
+export type UploadDigitalBillOutput = z.infer<typeof UploadDigitalBillOutputSchema>;
 
 
 // == App Specific Types ==

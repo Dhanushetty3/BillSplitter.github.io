@@ -10,34 +10,12 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { z } from 'genkit';
+import { ScanPhysicalBillInputSchema, ScanPhysicalBillOutputSchema } from '@/lib/types';
+import type { ScanPhysicalBillInput, ScanPhysicalBillOutput } from '@/lib/types';
 
-// Input Schema
-const ScanPhysicalBillInputSchema = z.object({
-  photoDataUri: z
-    .string()
-    .describe(
-      "A photo of a physical bill, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-});
-export type ScanPhysicalBillInput = z.infer<typeof ScanPhysicalBillInputSchema>;
+export { type ScanPhysicalBillInput, type ScanPhysicalBillOutput };
 
-// Output Schema
-const ScanPhysicalBillOutputSchema = z.object({
-  placeOfTransaction: z.string().describe('The name of the establishment where the transaction occurred.'),
-  date: z.string().optional().describe('The date of the transaction in YYYY-MM-DD format. Optional if not clearly visible.'),
-  items: z.array(
-    z.object({
-      description: z.string().describe('Description of the item.'),
-      amount: z.number().describe('Amount of the item.'),
-    })
-  ).describe('A list of individual items from the bill with their descriptions and amounts.'),
-  subtotal: z.number().optional().default(0).describe('The subtotal of all items before tax and tip.'),
-  tax: z.number().optional().default(0).describe('The tax amount applied to the bill.'),
-  tip: z.number().optional().default(0).describe('The tip amount added to the bill, if specified. Optional if not present.'),
-  total: z.number().optional().default(0).describe('The total amount of the bill, including subtotal, tax, and tip.'),
-}).describe('Extracted details from a scanned physical bill.');
-export type ScanPhysicalBillOutput = z.infer<typeof ScanPhysicalBillOutputSchema>;
 
 export async function scanPhysicalBill(input: ScanPhysicalBillInput): Promise<ScanPhysicalBillOutput> {
   return scanPhysicalBillFlow(input);
@@ -45,7 +23,7 @@ export async function scanPhysicalBill(input: ScanPhysicalBillInput): Promise<Sc
 
 const prompt = ai.definePrompt({
   name: 'scanPhysicalBillPrompt',
-  model: 'gemini-1.0-pro',
+  model: 'googleai/gemini-pro',
   input: {schema: ScanPhysicalBillInputSchema},
   output: {schema: ScanPhysicalBillOutputSchema},
   prompt: `You are an expert at extracting structured information from images of physical receipts. Your task is to analyze the provided image and extract bill details according to the specified JSON schema.
