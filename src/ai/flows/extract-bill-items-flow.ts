@@ -1,14 +1,40 @@
-
 'use server';
 /**
  * @fileOverview A Genkit flow for extracting bill items, prices, quantities, total, tax, tip, and restaurant name from an image of a bill.
  *
  * - extractBillItems - A function that handles the bill item extraction process with retry logic.
+ * - ExtractBillItemsInput - The input type for the extractBillItems function.
+ * - ExtractBillItemsOutput - The return type for the extractBillItems function.
  */
 
 import { ai } from '@/ai/genkit';
-import { ExtractBillItemsInputSchema, ExtractBillItemsOutputSchema } from '@/lib/types';
-import type { ExtractBillItemsInput, ExtractBillItemsOutput } from '@/lib/types';
+import { z } from 'genkit';
+
+const ExtractBillItemsInputSchema = z.object({
+  photoDataUri: z
+    .string()
+    .describe(
+      "A photo of a bill, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+});
+export type ExtractBillItemsInput = z.infer<typeof ExtractBillItemsInputSchema>;
+
+const ExtractBillItemsOutputSchema = z.object({
+  restaurantName: z.string().optional().describe('The name of the restaurant or establishment found on the bill.'),
+  items: z.array(
+    z.object({
+      name: z.string().describe('The name of the item.'),
+      quantity: z.number().describe('The quantity of the item.'),
+      price: z.number().describe('The price of a single unit of the item.'),
+      lineTotal: z.number().describe('The total price for this item (quantity * price).'),
+    })
+  ).describe('An array of extracted line items from the bill. If no items are found, return an empty array.'),
+  subtotal: z.number().describe('The subtotal of all items on the bill before tax and tip. If not found, return 0.'),
+  tax: z.number().describe('The tax amount applied to the bill. If not found, return 0.'),
+  tip: z.number().describe('The suggested or applied tip amount on the bill. If not found, return 0.'),
+  total: z.number().describe('The grand total of the bill, including subtotal, tax, and tip. If not found, return 0.'),
+});
+export type ExtractBillItemsOutput = z.infer<typeof ExtractBillItemsOutputSchema>;
 
 /**
  * Helper function to handle transient API errors with retries.
@@ -38,9 +64,9 @@ export async function extractBillItems(input: ExtractBillItemsInput): Promise<Ex
 
 const extractBillItemsPrompt = ai.definePrompt({
   name: 'extractBillItemsPrompt',
-  model: 'googleai/gemini-pro-vision',
   input: { schema: ExtractBillItemsInputSchema },
   output: { schema: ExtractBillItemsOutputSchema },
+  model: 'googleai/gemini-pro-vision',
   prompt: `You are an expert at extracting financial details from images of bills and receipts.
 
 Analyze the provided image of a bill and extract:
@@ -77,7 +103,7 @@ const extractBillItemsFlow = ai.defineFlow(
       // Clean up error message for user display
       let userMessage = `Extraction failed: ${error.message || 'Unknown error'}`;
       if (error.message?.includes('API key')) {
-        userMessage = 'The Google AI API key is missing. Please create one and add it to your .env file as \`GEMINI_API_KEY=YOUR_API_KEY\`.';
+        userMessage = 'The Google AI API key is missing. Please create one and add it to your .env file as `GEMINI_API_KEY=YOUR_API_KEY`.';
       } else if (error.message?.includes('503')) {
         userMessage = 'The AI service is currently very busy. Please wait a moment and try again.';
       }

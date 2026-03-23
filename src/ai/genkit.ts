@@ -1,13 +1,7 @@
-import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai';
+import {genkit} from 'genkit';
+import {googleAI} from '@genkit-ai/google-genai';
 
-// Initialize Genkit and export the 'ai' object
 export const ai = genkit({
-  plugins: [
-    googleAI(),
-  ],
-  // Log all traces to the console
-  logLevel: 'debug',
-  // Recommended for production apps
-  enableTracingAndMetrics: true,
+  plugins: [googleAI()],
+  model: 'googleai/gemini-2.5-flash',
 });

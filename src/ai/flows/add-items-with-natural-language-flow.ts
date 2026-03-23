@@ -10,8 +10,44 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { AddItemsWithNaturalLanguageInputSchema, AddItemsWithNaturalLanguageOutputSchema } from '@/lib/types';
-import type { AddItemsWithNaturalLanguageInput, AddItemsWithNaturalLanguageOutput } from '@/lib/types';
+
+const AddItemsWithNaturalLanguageInputSchema = z.object({
+  naturalLanguageInput: z
+    .string()
+    .describe(
+      'The natural language description of bill items and their assignments.'
+    ),
+  participants: z
+    .array(z.string())
+    .describe('A list of participant names involved in the bill splitting.'),
+});
+export type AddItemsWithNaturalLanguageInput = z.infer<
+  typeof AddItemsWithNaturalLanguageInputSchema
+>;
+
+const BillItemSchema = z.object({
+  description: z.string().describe('The description of the bill item.'),
+  amount: z.number().positive().describe('The amount of the bill item.'),
+  paidBy: z
+    .string()
+    .describe(
+      'The name of the participant who paid for this item. If not specified in the input, default to "unassigned". Must be one of the provided participant names or "unassigned".'
+    ),
+  splitAmong: z
+    .array(z.string())
+    .describe(
+      'A list of participant names among whom this item is split. If "everyone" or "all" is mentioned, it should include all provided participant names. If specific names are mentioned, include only those names. If no specific splitting instruction is given, and a "paidBy" person is identified, assume the item is split only by that person. If no specific splitting instruction is given and "paidBy" is "unassigned", assume it is split among all participants.'
+    ),
+});
+
+const AddItemsWithNaturalLanguageOutputSchema = z.object({
+  items: z
+    .array(BillItemSchema)
+    .describe('A list of extracted bill items with their details.'),
+});
+export type AddItemsWithNaturalLanguageOutput = z.infer<
+  typeof AddItemsWithNaturalLanguageOutputSchema
+>;
 
 export async function addItemsWithNaturalLanguage(
   input: AddItemsWithNaturalLanguageInput
@@ -23,6 +59,7 @@ const addItemsPrompt = ai.definePrompt({
   name: 'addItemsWithNaturalLanguagePrompt',
   input: { schema: AddItemsWithNaturalLanguageInputSchema },
   output: { schema: AddItemsWithNaturalLanguageOutputSchema },
+  model: 'googleai/gemini-pro',
   prompt: `You are an AI assistant designed to parse natural language input about bill items and assign them to participants.
 Your task is to extract bill items, their amounts, who paid for them, and among whom they are split from the user's input.
 
