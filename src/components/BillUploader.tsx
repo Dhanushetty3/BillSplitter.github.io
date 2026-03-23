@@ -1,21 +1,20 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Upload, Loader2, FileText, Camera, PlayCircle, WifiOff, X, ScanLine } from 'lucide-react';
+import { Upload, Loader2, FileText, Camera, WifiOff, X, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { analyzeBillImage, generateDemoBill } from '@/app/actions';
-import type { DemoBillData, ExtractBillItemsOutput } from '@/lib/types';
+import { analyzeBillImage } from '@/app/actions';
+import { type ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
 interface BillUploaderProps {
-  onDataExtracted: (data: ExtractBillItemsOutput | DemoBillData) => void;
+  onDataExtracted: (data: ExtractBillItemsOutput) => void;
   isOnline: boolean;
 }
 
 export default function BillUploader({ onDataExtracted, isOnline }: BillUploaderProps) {
   const [loading, setLoading] = useState(false);
-  const [demoLoading, setDemoLoading] = useState(false);
   const [billImages, setBillImages] = useState<string[]>([]);
   const { toast } = useToast();
 
@@ -156,33 +155,8 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
     }
   };
 
-  const handleDemoClick = async () => {
-    setDemoLoading(true);
-    try {
-        const result = await generateDemoBill();
-        if (result.success) {
-            onDataExtracted(result.data);
-        } else {
-            toast({
-                variant: "destructive",
-                title: "Demo Failed",
-                description: result.error,
-            });
-        }
-    } catch (error: any) {
-        console.error('Demo data error:', error);
-        toast({
-            variant: "destructive",
-            title: "Demo Failed",
-            description: error.message || "Could not generate demo data.",
-        });
-    } finally {
-        setDemoLoading(false);
-    }
-  };
-
   const commonButtonProps = {
-    disabled: loading || demoLoading || !isOnline,
+    disabled: loading || !isOnline,
   };
 
   return (
@@ -224,7 +198,7 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
           </div>
           <Button 
             onClick={handleAnalyzeBill}
-            disabled={loading || demoLoading}
+            disabled={loading}
             className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 text-base rounded-full shadow-lg"
           >
             {loading ? <Loader2 className="animate-spin" /> : <ScanLine className="mr-2" />}
@@ -272,24 +246,10 @@ export default function BillUploader({ onDataExtracted, isOnline }: BillUploader
         onChange={handleFileChange} 
       />
       
-      {(loading || demoLoading) && billImages.length === 0 && (
+      {loading && billImages.length === 0 && (
         <div className="mt-6 flex items-center gap-3 text-primary animate-pulse">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <p className="text-sm font-bold">{loading ? "Analyzing..." : "Generating demo..."}</p>
-        </div>
-      )}
-
-      {billImages.length === 0 && (
-        <div className="mt-4 w-full max-w-xs">
-          <Button
-              variant="link"
-              disabled={loading || demoLoading}
-              onClick={handleDemoClick}
-              className="w-full text-primary/80 hover:text-primary"
-          >
-              <PlayCircle className="w-4 h-4 mr-2" />
-              ... or try a demo
-          </Button>
+          <p className="text-sm font-bold">Analyzing...</p>
         </div>
       )}
     </div>

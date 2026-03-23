@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Receipt, Users, ListTodo, PieChart, RotateCcw, PlusCircle, AlertCircle, Sun, Moon, Store, Percent, Scale, ListFilter, PlayCircle, CheckCircle2, Undo2, ArrowUpCircle } from 'lucide-react';
+import { Receipt, Users, ListTodo, PieChart, RotateCcw, PlusCircle, AlertCircle, Sun, Moon, Store, Percent, Scale, ListFilter, CheckCircle2, Undo2, ArrowUpCircle } from 'lucide-react';
 import BillUploader from '@/components/BillUploader';
 import FriendManager from '@/components/FriendManager';
 import ItemAssigner from '@/components/ItemAssigner';
@@ -17,7 +17,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
-import type { DemoBillData } from '@/app/actions';
 import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 import { formatCurrency } from '@/lib/utils';
 
@@ -162,7 +161,7 @@ export default function BillSplitter() {
 
   const billTotal = useMemo(() => billMeta.subtotal + billMeta.tax + billMeta.tip, [billMeta]);
 
-  const onDataExtracted = (data: ExtractBillItemsOutput | DemoBillData) => {
+  const onDataExtracted = (data: ExtractBillItemsOutput) => {
     const formattedItems: BillItem[] = data.items.map((it, idx) => ({
       id: `item-${idx}-${Date.now()}`,
       name: it.name,
@@ -178,10 +177,6 @@ export default function BillSplitter() {
       tip: data.tip || 0,
       subtotal: data.subtotal > 0 ? data.subtotal : formattedItems.reduce((sum, it) => sum + it.lineTotal, 0)
     });
-
-    if ('isDemo' in data && data.isDemo) {
-      setFriends(data.participants);
-    }
 
     setShowSuccessModal(true);
   };
