@@ -1,8 +1,43 @@
 'use client';
 
-import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
-import type { UploadDigitalBillOutput } from '@/ai/flows/upload-digital-bill';
-import type { AddItemsWithNaturalLanguageOutput } from '@/ai/flows/add-items-with-natural-language';
+// Types previously imported from AI flows are now defined here
+// to remove server-side code from the static build.
+export type ExtractBillItemsOutput = {
+  restaurantName?: string;
+  items: {
+    name: string;
+    quantity: number;
+    price: number;
+    lineTotal: number;
+  }[];
+  subtotal: number;
+  tax: number;
+  tip: number;
+  total: number;
+};
+
+export type UploadDigitalBillOutput = {
+  place: string;
+  subtotal: number;
+  tax: number;
+  tip: number;
+  total: number;
+  items: {
+    name: string;
+    amount: number;
+  }[];
+  participants: string[];
+};
+
+export type AddItemsWithNaturalLanguageOutput = {
+  items: {
+    description: string;
+    amount: number;
+    paidBy: string;
+    splitAmong: string[];
+  }[];
+};
+
 
 // This type was previously imported from the now-unused flow.
 export type GenerateDemoBillOutput = {
