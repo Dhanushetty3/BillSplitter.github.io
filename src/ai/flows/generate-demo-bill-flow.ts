@@ -15,7 +15,7 @@ export async function generateDemoBill(): Promise<GenerateDemoBillOutput> {
 
 const generatePrompt = ai.definePrompt({
   name: 'generateDemoBillPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-pro',
   output: { schema: GenerateDemoBillOutputSchema },
   prompt: `You are a creative assistant. Generate a realistic but fictional restaurant bill for a demo of a bill-splitting app.
   
