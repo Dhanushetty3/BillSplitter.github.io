@@ -1,20 +1,8 @@
-'use server';
+'use client';
 
-import { 
-  extractBillItems,
-  ExtractBillItemsInput,
-  ExtractBillItemsOutput
-} from '@/ai/flows/extract-bill-items-flow';
-import { 
-  uploadDigitalBill,
-  UploadDigitalBillInput,
-  UploadDigitalBillOutput
-} from '@/ai/flows/upload-digital-bill';
-import { 
-  addItemsWithNaturalLanguage,
-  AddItemsWithNaturalLanguageInput,
-  AddItemsWithNaturalLanguageOutput
-} from '@/ai/flows/add-items-with-natural-language';
+import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
+import type { UploadDigitalBillOutput } from '@/ai/flows/upload-digital-bill';
+import type { AddItemsWithNaturalLanguageOutput } from '@/ai/flows/add-items-with-natural-language';
 
 // This type was previously imported from the now-unused flow.
 export type GenerateDemoBillOutput = {
@@ -42,59 +30,31 @@ type ActionResult<T> = {
 
 export type DemoBillData = GenerateDemoBillOutput & { isDemo: true };
 
+const staticSiteError = 'AI features are disabled on this static version of the app. Please run the project locally to use this functionality.';
+
 export async function analyzeBillImage(
   dataUri: string
 ): Promise<ActionResult<ExtractBillItemsOutput>> {
-  try {
-    const input: ExtractBillItemsInput = { photoDataUri: dataUri };
-    const result = await extractBillItems(input);
-    return { success: true, data: result };
-  } catch (e) {
-    const error = e instanceof Error ? e : new Error('Unknown error');
-    console.error('Error analyzing bill image:', error.message);
-    let userMessage = error.message || 'Failed to analyze the bill image. Please try again.';
-    if (error.message?.includes('API key')) {
-      userMessage = 'The Google AI API key is missing. Please create one and add it to your .env file as `GEMINI_API_KEY=YOUR_API_KEY`.';
-    } else if (error.message?.includes('503')) {
-      userMessage = 'The AI service is currently very busy. Please wait a moment and try again.';
-    }
-    return { success: false, error: userMessage };
-  }
+  console.error(staticSiteError, dataUri);
+  return { success: false, error: staticSiteError };
 }
 
 export async function analyzeDigitalBill(
   dataUri: string
 ): Promise<ActionResult<UploadDigitalBillOutput>> {
-  try {
-    const input: UploadDigitalBillInput = { billDataUri: dataUri };
-    const result = await uploadDigitalBill(input);
-    return { success: true, data: result };
-  } catch (e) {
-    const error = e instanceof Error ? e : new Error('Unknown error');
-    console.error('Error analyzing digital bill:', error.message);
-    return { success: false, error: 'Failed to parse the digital bill. Please try again.' };
-  }
+  console.error(staticSiteError, dataUri);
+  return { success: false, error: staticSiteError };
 }
 
 export async function processNaturalLanguageItems(
   naturalLanguageInput: string,
   participants: {name: string}[]
 ): Promise<ActionResult<AddItemsWithNaturalLanguageOutput>> {
+  console.error(staticSiteError, naturalLanguageInput, participants);
   if (participants.length === 0) {
       return { success: false, error: 'Please add participants before using this feature.' };
   }
-  try {
-    const input: AddItemsWithNaturalLanguageInput = {
-      naturalLanguageInput,
-      participants: participants.map(p => p.name)
-    };
-    const result = await addItemsWithNaturalLanguage(input);
-    return { success: true, data: result };
-  } catch (e) {
-    const error = e instanceof Error ? e : new Error('Unknown error');
-    console.error('Error processing natural language items:', error.message);
-    return { success: false, error: 'Failed to process the items. Please check your input.' };
-  }
+  return { success: false, error: staticSiteError };
 }
 
 export async function generateDemoBill(): Promise<ActionResult<DemoBillData>> {
