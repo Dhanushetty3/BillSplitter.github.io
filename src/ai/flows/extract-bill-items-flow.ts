@@ -62,7 +62,7 @@ const extractBillItemsPrompt = ai.definePrompt({
   name: 'extractBillItemsPrompt',
   input: { schema: ExtractBillItemsInputSchema },
   output: { schema: ExtractBillItemsOutputSchema },
-  model: 'googleai/gemini-pro-vision',
+  model: 'googleai/gemini-2.5-flash',
   prompt: `You are an expert at extracting financial details from images of bills and receipts.
 
 Analyze the provided image of a bill and extract:

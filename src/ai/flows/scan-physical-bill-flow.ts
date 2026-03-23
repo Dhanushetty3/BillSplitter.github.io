@@ -43,7 +43,7 @@ const prompt = ai.definePrompt({
   name: 'scanPhysicalBillPrompt',
   input: {schema: ScanPhysicalBillInputSchema},
   output: {schema: ScanPhysicalBillOutputSchema},
-  model: 'googleai/gemini-pro-vision',
+  model: 'googleai/gemini-2.5-flash',
   prompt: `You are an expert at extracting structured information from images of physical receipts. Your task is to analyze the provided image and extract bill details according to the specified JSON schema.
 
 - Identify the establishment's name ('placeOfTransaction'). If it's not clear, use "Unknown".

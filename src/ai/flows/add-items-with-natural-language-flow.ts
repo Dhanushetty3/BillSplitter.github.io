@@ -53,7 +53,7 @@ const addItemsPrompt = ai.definePrompt({
   name: 'addItemsWithNaturalLanguagePrompt',
   input: { schema: AddItemsWithNaturalLanguageInputSchema },
   output: { schema: AddItemsWithNaturalLanguageOutputSchema },
-  model: 'googleai/gemini-pro',
+  model: 'googleai/gemini-2.5-flash',
   prompt: `You are an AI assistant designed to parse natural language input about bill items and assign them to participants.
 Your task is to extract bill items, their amounts, who paid for them, and among whom they are split from the user's input.
 

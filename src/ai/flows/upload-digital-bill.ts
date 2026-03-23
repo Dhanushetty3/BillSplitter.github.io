@@ -39,7 +39,7 @@ const parseBillPrompt = ai.definePrompt({
   name: 'parseBillPrompt',
   input: { schema: UploadDigitalBillInputSchema },
   output: { schema: UploadDigitalBillOutputSchema },
-  model: 'googleai/gemini-pro-vision',
+  model: 'googleai/gemini-2.5-flash',
   prompt: `You are an expert at parsing financial documents. Your task is to extract all relevant information from the provided digital bill (which could be an image or a PDF) and structure it into a JSON object.
 
 Carefully identify and extract the following details:
