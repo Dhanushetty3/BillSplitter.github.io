@@ -37,8 +37,6 @@ export async function analyzeBillImage(
   }
 }
 
-// analyzeDigitalBill was removed as it's not used. To restore, a flow would be needed.
-
 export async function processNaturalLanguageItems(
   naturalLanguageInput: string,
   participants: {name: string}[]

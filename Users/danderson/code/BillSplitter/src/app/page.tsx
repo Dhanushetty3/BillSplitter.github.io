@@ -345,7 +345,7 @@ export default function BillSplitter() {
 
       {/* Top Dynamic Spacer for centering */}
       <div className={cn(
-        "transition-all duration-['4s'] ease-in-out transform-gpu",
+        "transition-all duration-[4s] ease-in-out transform-gpu",
         isCenteredLayout ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
       )} />
 
@@ -415,11 +415,11 @@ export default function BillSplitter() {
 
       {/* Header & Logo Section */}
       <div className={cn(
-        "transition-all duration-['4s'] transform-gpu ease-in-out flex flex-col items-center justify-center w-full z-50",
+        "transition-all duration-[4s] transform-gpu ease-in-out flex flex-col items-center justify-center w-full z-50",
         isCenteredLayout ? "mb-0" : "h-auto mb-2"
       )}>
         <div className={cn(
-          "flex flex-col items-center transition-all duration-['4s'] transform-gpu",
+          "flex flex-col items-center transition-all duration-[4s] transform-gpu",
           isCenteredLayout && animationStage < 2 ? "scale-110 md:scale-125" : "scale-100"
         )}>
           <div className={cn(
@@ -435,7 +435,7 @@ export default function BillSplitter() {
           </div>
           
           <p className={cn(
-            "mt-3 text-sm md:text-base text-muted-foreground font-medium text-center transition-all duration-['2s']",
+            "mt-3 text-sm md:text-base text-muted-foreground font-medium text-center transition-all duration-[2s]",
             animationStage >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           )}>
             Split the bill, not the friendship.
@@ -445,24 +445,24 @@ export default function BillSplitter() {
 
       {/* Main Content Reveal */}
       <div className={cn(
-        "transition-all duration-['4s'] transform-gpu flex flex-col w-full",
+        "transition-all duration-[4s] transform-gpu flex flex-col w-full",
         animationStage < 2 && !isBillUploaded ? "opacity-0 pointer-events-none mt-0 h-0 overflow-hidden" : "opacity-100 translate-y-0 mt-4 h-auto"
       )}>
         
         {!isBillUploaded ? (
-          <div className="max-w-xl mx-auto w-full py-2 space-y-4 animate-in fade-in duration-['4s']">
+          <div className="max-w-xl mx-auto w-full py-2 space-y-4 animate-in fade-in duration-[4s]">
             <div className="bg-card rounded-3xl p-6 md:p-8 shadow-xl border border-border/50">
                <BillUploader onDataExtracted={onDataExtracted} isOnline={isOnline} />
             </div>
           </div>
         ) : (
           <div className={cn(
-            "animate-in fade-in duration-['2s']",
+            "animate-in fade-in duration-[2s]",
             showFullLayout ? "grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8" : "flex flex-col items-center"
           )}>
             <div className={cn(
               "w-full space-y-6",
-              showFullLayout ? "lg:col-span-4 animate-in slide-in-from-left-8 duration-['2s']" : "lg:max-w-lg"
+              showFullLayout ? "lg:col-span-4 animate-in slide-in-from-left-8 duration-[2s]" : "lg:max-w-lg"
             )}>
               <section id="group-members-section" className="bg-card rounded-2xl p-6 shadow-sm border border-border scroll-mt-24 transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
@@ -563,7 +563,7 @@ export default function BillSplitter() {
             </div>
 
             {showFullLayout && (
-              <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-['2s']">
+              <div className="lg:col-span-8 animate-in slide-in-from-right-8 duration-[2s]">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 h-14 bg-card p-1 rounded-2xl shadow-sm border border-border mb-6">
                     <TabsTrigger value="scan" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white">
@@ -774,7 +774,7 @@ export default function BillSplitter() {
 
       {/* Bottom Dynamic Spacer for centering */}
       <div className={cn(
-        "transition-all duration-['4s'] ease-in-out transform-gpu",
+        "transition-all duration-[4s] ease-in-out transform-gpu",
         isCenteredLayout ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
       )} />
 
