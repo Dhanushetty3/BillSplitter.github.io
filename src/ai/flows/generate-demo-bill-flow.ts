@@ -4,25 +4,10 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-
-const BillItemSchema = z.object({
-  name: z.string().describe('The name of the item.'),
-  quantity: z.number().describe('The quantity of the item.'),
-  price: z.number().describe('The price of a single unit of the item.'),
-  lineTotal: z.number().describe('The total price for the item line (quantity * price).'),
-});
-
-const GenerateDemoBillOutputSchema = z.object({
-  restaurantName: z.string().describe('A creative and fun name for a fictional restaurant.'),
-  items: z.array(BillItemSchema).describe('A list of 2-4 items on the bill.'),
-  subtotal: z.number().describe('The subtotal of the bill before tax and tip.'),
-  tax: z.number().describe('The total tax amount on the bill.'),
-  tip: z.number().describe('The total tip or gratuity amount on the bill.'),
-  total: z.number().describe('The grand total of the bill.'),
-  participants: z.array(z.string()).describe('A list of 2-3 fictional participant names (e.g., Alice, Bob).'),
-});
-export type GenerateDemoBillOutput = z.infer<typeof GenerateDemoBillOutputSchema>;
+import { 
+    GenerateDemoBillOutputSchema, 
+    type GenerateDemoBillOutput 
+} from '@/lib/types';
 
 export async function generateDemoBill(): Promise<GenerateDemoBillOutput> {
   return generateDemoBillFlow();

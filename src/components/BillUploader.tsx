@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { Upload, Loader2, FileText, Camera, PlayCircle, WifiOff, X, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { analyzeBillImage, generateDemoBill } from '@/app/actions';
-import type { DemoBillData } from '@/app/actions';
-import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
+import type { DemoBillData, ExtractBillItemsOutput } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 

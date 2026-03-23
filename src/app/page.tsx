@@ -8,7 +8,6 @@ import FriendManager from '@/components/FriendManager';
 import ItemAssigner from '@/components/ItemAssigner';
 import SplitSummary from '@/components/SplitSummary';
 import { BillItem, calculateSplits, SplitMode } from '@/lib/bill-utils';
-import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
-import type { DemoBillData } from '@/app/actions';
+import type { DemoBillData, ExtractBillItemsOutput } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 
 export default function BillSplitter() {

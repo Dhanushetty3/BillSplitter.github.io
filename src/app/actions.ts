@@ -2,27 +2,20 @@
 
 import {
   extractBillItems,
-  type ExtractBillItemsOutput,
 } from '@/ai/flows/extract-bill-items-flow';
 import {
-    generateDemoBill as generateDemoBillFlow,
-    type GenerateDemoBillOutput
+    generateDemoBill as generateDemoBillFlow
 } from '@/ai/flows/generate-demo-bill-flow';
 import {
   addItemsWithNaturalLanguage,
-  type AddItemsWithNaturalLanguageOutput,
 } from '@/ai/flows/add-items-with-natural-language-flow';
+import type { 
+    ActionResult,
+    ExtractBillItemsOutput,
+    AddItemsWithNaturalLanguageOutput,
+    DemoBillData
+} from '@/lib/types';
 
-
-type ActionResult<T> = {
-  success: true;
-  data: T;
-} | {
-  success: false;
-  error: string;
-};
-
-export type DemoBillData = GenerateDemoBillOutput & { isDemo: true };
 
 export async function analyzeBillImage(
   dataUri: string
