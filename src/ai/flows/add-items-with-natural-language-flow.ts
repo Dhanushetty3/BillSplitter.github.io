@@ -49,12 +49,6 @@ export type AddItemsWithNaturalLanguageOutput = z.infer<
   typeof AddItemsWithNaturalLanguageOutputSchema
 >;
 
-export async function addItemsWithNaturalLanguage(
-  input: AddItemsWithNaturalLanguageInput
-): Promise<AddItemsWithNaturalLanguageOutput> {
-  return addItemsWithNaturalLanguageFlow(input);
-}
-
 const addItemsPrompt = ai.definePrompt({
   name: 'addItemsWithNaturalLanguagePrompt',
   input: { schema: AddItemsWithNaturalLanguageInputSchema },
@@ -119,7 +113,7 @@ naturalLanguageInput: {{{naturalLanguageInput}}}
 Participants: {{#each participants}}"{{this}}"{{#unless @last}}, {{/unless}}{{/each}}`,
 });
 
-const addItemsWithNaturalLanguageFlow = ai.defineFlow(
+export const addItemsWithNaturalLanguage = ai.defineFlow(
   {
     name: 'addItemsWithNaturalLanguageFlow',
     inputSchema: AddItemsWithNaturalLanguageInputSchema,

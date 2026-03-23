@@ -2,7 +2,7 @@
 /**
  * @fileOverview A Genkit flow for extracting bill items, prices, quantities, total, tax, tip, and restaurant name from an image of a bill.
  *
- * - extractBillItems - A function that handles the bill item extraction process with retry logic.
+ * - extractBillItems - A Genkit flow that handles the bill item extraction process with retry logic.
  * - ExtractBillItemsInput - The input type for the extractBillItems function.
  * - ExtractBillItemsOutput - The return type for the extractBillItems function.
  */
@@ -58,10 +58,6 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Pr
   }
 }
 
-export async function extractBillItems(input: ExtractBillItemsInput): Promise<ExtractBillItemsOutput> {
-  return extractBillItemsFlow(input);
-}
-
 const extractBillItemsPrompt = ai.definePrompt({
   name: 'extractBillItemsPrompt',
   input: { schema: ExtractBillItemsInputSchema },
@@ -82,7 +78,7 @@ Ensure all monetary values are extracted as numbers. If a value is not found or 
 Bill Image: {{media url=photoDataUri}}`,
 });
 
-const extractBillItemsFlow = ai.defineFlow(
+export const extractBillItems = ai.defineFlow(
   {
     name: 'extractBillItemsFlow',
     inputSchema: ExtractBillItemsInputSchema,

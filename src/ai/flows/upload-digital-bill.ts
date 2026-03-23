@@ -35,10 +35,6 @@ const UploadDigitalBillOutputSchema = z.object({
 });
 export type UploadDigitalBillOutput = z.infer<typeof UploadDigitalBillOutputSchema>;
 
-export async function uploadDigitalBill(input: UploadDigitalBillInput): Promise<UploadDigitalBillOutput> {
-  return uploadDigitalBillFlow(input);
-}
-
 const parseBillPrompt = ai.definePrompt({
   name: 'parseBillPrompt',
   input: { schema: UploadDigitalBillInputSchema },
@@ -60,7 +56,7 @@ Assume currency is INR unless otherwise specified. Ensure all monetary values ar
 Digital Bill: {{media url=billDataUri}}`,
 });
 
-const uploadDigitalBillFlow = ai.defineFlow(
+export const uploadDigitalBill = ai.defineFlow(
   {
     name: 'uploadDigitalBillFlow',
     inputSchema: UploadDigitalBillInputSchema,

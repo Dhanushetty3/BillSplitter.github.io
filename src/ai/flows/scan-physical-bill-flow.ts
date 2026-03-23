@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for scanning a physical bill
@@ -39,9 +38,6 @@ const ScanPhysicalBillOutputSchema = z.object({
 }).describe('Extracted details from a scanned physical bill.');
 export type ScanPhysicalBillOutput = z.infer<typeof ScanPhysicalBillOutputSchema>;
 
-export async function scanPhysicalBill(input: ScanPhysicalBillInput): Promise<ScanPhysicalBillOutput> {
-  return scanPhysicalBillFlow(input);
-}
 
 const prompt = ai.definePrompt({
   name: 'scanPhysicalBillPrompt',
@@ -61,7 +57,7 @@ CRITICAL: If any numeric value (subtotal, tax, tip, total, or item amounts) is n
 Image of the bill: {{media url=photoDataUri}}`,
 });
 
-const scanPhysicalBillFlow = ai.defineFlow(
+export const scanPhysicalBill = ai.defineFlow(
   {
     name: 'scanPhysicalBillFlow',
     inputSchema: ScanPhysicalBillInputSchema,

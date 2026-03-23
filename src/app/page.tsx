@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -18,7 +17,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
-import type { DemoBillData, ExtractBillItemsOutput } from '@/lib/types';
+import type { DemoBillData } from '@/app/actions';
+import type { ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
 import { formatCurrency } from '@/lib/utils';
 
 export default function BillSplitter() {

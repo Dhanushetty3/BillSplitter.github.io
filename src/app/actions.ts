@@ -1,10 +1,11 @@
 'use client';
 
-import { extractBillItems as analyzeBillImageFlow, ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
-import { uploadDigitalBill as uploadDigitalBillFlow, UploadDigitalBillOutput } from '@/ai/flows/upload-digital-bill';
-import { addItemsWithNaturalLanguage as addItemsWithNaturalLanguageFlow, AddItemsWithNaturalLanguageOutput } from '@/ai/flows/add-items-with-natural-language-flow';
+import { extractBillItems as analyzeBillImageFlow, type ExtractBillItemsOutput } from '@/ai/flows/extract-bill-items-flow';
+import { uploadDigitalBill as uploadDigitalBillFlow, type UploadDigitalBillOutput } from '@/ai/flows/upload-digital-bill';
+import { addItemsWithNaturalLanguage as addItemsWithNaturalLanguageFlow, type AddItemsWithNaturalLanguageOutput } from '@/ai/flows/add-items-with-natural-language-flow';
 
-// This type was previously imported from the now-unused flow.
+// This type was previously imported from a non-existent flow.
+// It is kept here for the hardcoded demo data.
 export type GenerateDemoBillOutput = {
   restaurantName: string;
   items: {
