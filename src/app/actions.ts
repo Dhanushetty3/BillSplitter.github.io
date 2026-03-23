@@ -21,7 +21,7 @@ export async function analyzeBillImage(
   dataUri: string
 ): Promise<ActionResult<ExtractBillItemsOutput>> {
   try {
-    const result = await extractBillItems({ billImage: dataUri });
+    const result = await extractBillItems({ photoDataUri: dataUri });
     return { success: true, data: result };
   } catch (e) {
     const error = e instanceof Error ? e : new Error('Unknown error');
@@ -34,7 +34,7 @@ export async function analyzeBillImage(
 
 export async function processNaturalLanguageItems(
   naturalLanguageInput: string,
-  participants: {name: string}[]
+  participants: string[]
 ): Promise<ActionResult<AddItemsWithNaturalLanguageOutput>> {
   try {
     if (participants.length === 0) {
