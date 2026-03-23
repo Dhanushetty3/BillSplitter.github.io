@@ -12,8 +12,6 @@ import { z } from 'genkit';
 import { UploadDigitalBillInputSchema, UploadDigitalBillOutputSchema } from '@/lib/types';
 import type { UploadDigitalBillInput, UploadDigitalBillOutput } from '@/lib/types';
 
-export { type UploadDigitalBillInput, type UploadDigitalBillOutput };
-
 export async function uploadDigitalBill(input: UploadDigitalBillInput): Promise<UploadDigitalBillOutput> {
   return uploadDigitalBillFlow(input);
 }

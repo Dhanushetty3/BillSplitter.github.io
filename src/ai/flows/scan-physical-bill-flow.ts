@@ -14,8 +14,6 @@ import { z } from 'genkit';
 import { ScanPhysicalBillInputSchema, ScanPhysicalBillOutputSchema } from '@/lib/types';
 import type { ScanPhysicalBillInput, ScanPhysicalBillOutput } from '@/lib/types';
 
-export { type ScanPhysicalBillInput, type ScanPhysicalBillOutput };
-
 
 export async function scanPhysicalBill(input: ScanPhysicalBillInput): Promise<ScanPhysicalBillOutput> {
   return scanPhysicalBillFlow(input);

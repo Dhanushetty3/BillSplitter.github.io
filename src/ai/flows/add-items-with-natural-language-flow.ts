@@ -13,8 +13,6 @@ import { z } from 'genkit';
 import { AddItemsWithNaturalLanguageInputSchema, AddItemsWithNaturalLanguageOutputSchema } from '@/lib/types';
 import type { AddItemsWithNaturalLanguageInput, AddItemsWithNaturalLanguageOutput } from '@/lib/types';
 
-export { type AddItemsWithNaturalLanguageInput, type AddItemsWithNaturalLanguageOutput };
-
 export async function addItemsWithNaturalLanguage(
   input: AddItemsWithNaturalLanguageInput
 ): Promise<AddItemsWithNaturalLanguageOutput> {
