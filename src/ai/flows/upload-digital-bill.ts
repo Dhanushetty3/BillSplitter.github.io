@@ -1,14 +1,12 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for uploading and parsing digital bills (images or PDFs).
  *
  * - uploadDigitalBill - A function that parses bill details from an uploaded digital file.
- * - UploadDigitalBillInput - The input type for the uploadDigitalBill function.
- * - UploadDigitalBillOutput - The return type for the uploadDigitalBill function.
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
 import { UploadDigitalBillInputSchema, UploadDigitalBillOutputSchema } from '@/lib/types';
 import type { UploadDigitalBillInput, UploadDigitalBillOutput } from '@/lib/types';
 
@@ -18,6 +16,7 @@ export async function uploadDigitalBill(input: UploadDigitalBillInput): Promise<
 
 const parseBillPrompt = ai.definePrompt({
   name: 'parseBillPrompt',
+  model: 'googleai/gemini-pro-vision',
   input: { schema: UploadDigitalBillInputSchema },
   output: { schema: UploadDigitalBillOutputSchema },
   prompt: `You are an expert at parsing financial documents. Your task is to extract all relevant information from the provided digital bill (which could be an image or a PDF) and structure it into a JSON object.

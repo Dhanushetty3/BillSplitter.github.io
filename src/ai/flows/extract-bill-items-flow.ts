@@ -4,14 +4,11 @@
  * @fileOverview A Genkit flow for extracting bill items, prices, quantities, total, tax, tip, and restaurant name from an image of a bill.
  *
  * - extractBillItems - A function that handles the bill item extraction process with retry logic.
- * - ExtractBillItemsInput - The input type for the extractBillItems function.
- * - ExtractBillItemsOutput - The return type for the extractBillItems function.
  */
 
 import { ai } from '@/ai/genkit';
 import { ExtractBillItemsInputSchema, ExtractBillItemsOutputSchema } from '@/lib/types';
 import type { ExtractBillItemsInput, ExtractBillItemsOutput } from '@/lib/types';
-
 
 /**
  * Helper function to handle transient API errors with retries.
@@ -41,6 +38,7 @@ export async function extractBillItems(input: ExtractBillItemsInput): Promise<Ex
 
 const extractBillItemsPrompt = ai.definePrompt({
   name: 'extractBillItemsPrompt',
+  model: 'googleai/gemini-pro-vision',
   input: { schema: ExtractBillItemsInputSchema },
   output: { schema: ExtractBillItemsOutputSchema },
   prompt: `You are an expert at extracting financial details from images of bills and receipts.

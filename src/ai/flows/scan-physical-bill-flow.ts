@@ -5,12 +5,9 @@
  * image, extracting item details, amounts, and summary data.
  *
  * - scanPhysicalBill - A function that handles the physical bill scanning process.
- * - ScanPhysicalBillInput - The input type for the scanPhysicalBill function.
- * - ScanPhysicalBillOutput - The return type for the scanPhysicalBill function.
  */
 
 import {ai} from '@/ai/genkit';
-import { z } from 'genkit';
 import { ScanPhysicalBillInputSchema, ScanPhysicalBillOutputSchema } from '@/lib/types';
 import type { ScanPhysicalBillInput, ScanPhysicalBillOutput } from '@/lib/types';
 
@@ -21,6 +18,7 @@ export async function scanPhysicalBill(input: ScanPhysicalBillInput): Promise<Sc
 
 const prompt = ai.definePrompt({
   name: 'scanPhysicalBillPrompt',
+  model: 'googleai/gemini-pro-vision',
   input: {schema: ScanPhysicalBillInputSchema},
   output: {schema: ScanPhysicalBillOutputSchema},
   prompt: `You are an expert at extracting structured information from images of physical receipts. Your task is to analyze the provided image and extract bill details according to the specified JSON schema.
