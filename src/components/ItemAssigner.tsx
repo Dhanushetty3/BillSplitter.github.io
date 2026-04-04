@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { User, Check, Trash2 } from 'lucide-react';
+import { User, Check, Trash2, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ interface ItemAssignerProps {
   onToggleAssignment: (itemId: string, friend: string) => void;
   onUpdateItem: (itemId: string, updates: Partial<BillItem>) => void;
   onDeleteItem: (itemId: string) => void;
+  onAssignToAll: (itemId: string) => void;
 }
 
 export default function ItemAssigner({
@@ -25,12 +26,14 @@ export default function ItemAssigner({
   assignments,
   onToggleAssignment,
   onUpdateItem,
-  onDeleteItem
+  onDeleteItem,
+  onAssignToAll
 }: ItemAssignerProps) {
   return (
     <div className="space-y-4">
       {items.map((item) => {
         const itemAssignments = assignments[item.id] || [];
+        const isAllAssigned = friends.length > 0 && itemAssignments.length === friends.length;
         return (
           <Card key={item.id} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md">
             <CardContent className="p-4">
@@ -95,6 +98,22 @@ export default function ItemAssigner({
                 <div className="border-t border-border/50 pt-3 mt-4">
                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Assign to:</p>
                     <div className="flex flex-wrap gap-2">
+                      {friends.length > 0 && (
+                        <button
+                            key={`${item.id}-all`}
+                            onClick={() => onAssignToAll(item.id)}
+                            className={cn(
+                              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                              isAllAssigned
+                                ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                                : "bg-background text-muted-foreground border-border hover:bg-muted"
+                            )}
+                          >
+                            <Users className={cn("w-3 h-3", !isAllAssigned && "text-muted-foreground/70")} />
+                            All
+                            {isAllAssigned && <Check className="w-3 h-3 ml-0.5" />}
+                          </button>
+                      )}
                       {friends.map((friend) => {
                         const isActive = itemAssignments.includes(friend);
                         return (

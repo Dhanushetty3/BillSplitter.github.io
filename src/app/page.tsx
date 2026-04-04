@@ -198,6 +198,17 @@ export default function BillSplitter() {
     setShowRevertDialog(false);
   };
 
+  const handleAssignToAll = (itemId: string) => {
+    setAssignments(prev => {
+      const currentAssignments = prev[itemId] || [];
+      // If all friends are already assigned, unassign all. Otherwise, assign all.
+      if (friends.length > 0 && currentAssignments.length === friends.length) {
+        return { ...prev, [itemId]: [] };
+      }
+      return { ...prev, [itemId]: [...friends] };
+    });
+  };
+
   const handleToggleAssignment = (itemId: string, friend: string) => {
     setAssignments(prev => {
       const current = prev[itemId] || [];
@@ -652,6 +663,7 @@ export default function BillSplitter() {
                           onToggleAssignment={handleToggleAssignment}
                           onUpdateItem={handleUpdateItem}
                           onDeleteItem={handleDeleteItem}
+                          onAssignToAll={handleAssignToAll}
                         />
                       </div>
                     )}
