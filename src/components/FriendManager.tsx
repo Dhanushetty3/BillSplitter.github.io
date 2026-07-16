@@ -31,9 +31,11 @@ export default function FriendManager({ friends, onAddFriend, onRemoveFriend }: 
     const names = newName.split(/[,\n]/).map(n => n.trim()).filter(n => n !== '');
     
     let addedCount = 0;
+    const seen = new Set(friends);
     names.forEach(name => {
-      if (!friends.includes(name)) {
+      if (!seen.has(name)) {
         onAddFriend(name);
+        seen.add(name);
         addedCount++;
       }
     });
@@ -50,10 +52,12 @@ export default function FriendManager({ friends, onAddFriend, onRemoveFriend }: 
         const contacts = await navigator.contacts.select(['name'], { multiple: true });
         if (contacts && contacts.length > 0) {
           let addedCount = 0;
+          const seen = new Set(friends);
           contacts.forEach((contact: any) => {
             const name = contact.name?.[0] || 'Unknown';
-            if (!friends.includes(name)) {
+            if (!seen.has(name)) {
               onAddFriend(name);
+              seen.add(name);
               addedCount++;
             }
           });
@@ -82,8 +86,13 @@ export default function FriendManager({ friends, onAddFriend, onRemoveFriend }: 
       }
       if (names.length > 0) {
         let addedCount = 0;
+        const seen = new Set(friends);
         names.forEach(name => {
-          if (!friends.includes(name)) { onAddFriend(name); addedCount++; }
+          if (!seen.has(name)) {
+            onAddFriend(name);
+            seen.add(name);
+            addedCount++;
+          }
         });
         if (addedCount > 0) toast({ title: "Imported", description: `Added ${addedCount} names.` });
       }

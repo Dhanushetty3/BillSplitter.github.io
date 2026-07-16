@@ -66,7 +66,7 @@ export default function BillSplitter() {
             const parsed = JSON.parse(savedState);
             setItems(parsed.items || []);
             setOriginalItems(parsed.originalItems || []);
-            setFriends(parsed.friends || []);
+            setFriends(Array.from(new Set(parsed.friends || [])));
             setAssignments(parsed.assignments || {});
             setSplitMode(parsed.splitMode || 'item-wise');
             setPercentages(parsed.percentages || {});
@@ -465,7 +465,7 @@ export default function BillSplitter() {
                 </div>
                 <FriendManager 
                   friends={friends} 
-                  onAddFriend={name => setFriends(prev => [...prev, name])} 
+                  onAddFriend={name => setFriends(prev => prev.includes(name) ? prev : [...prev, name])} 
                   onRemoveFriend={handleRemoveFriend}
                 />
                 {friends.length === 0 && isBillUploaded && (
