@@ -96,7 +96,6 @@ export const extractBillItems = ai.defineFlow(
       return result;
     } catch (error: any) {
       console.error('Genkit Flow Error:', error);
-      // Clean up error message for user display
       let userMessage = `Extraction failed: ${error.message || 'Unknown error'}`;
       if (error.message?.includes('API key')) {
         userMessage = 'The Google AI API key is missing. Please create one and add it to your .env file as `GEMINI_API_KEY=YOUR_API_KEY`.';

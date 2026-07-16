@@ -48,21 +48,18 @@ export default function BillSplitter() {
   useEffect(() => {
     setMounted(true);
     
-    // --- Online/Offline Listeners ---
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     setIsOnline(navigator.onLine);
 
-    // --- Theme ---
     const isDark = localStorage.getItem('theme') === 'dark';
     setIsDarkMode(isDark);
     if (isDark) {
       document.documentElement.classList.add('dark');
     }
 
-    // --- Load State from localStorage ---
     try {
         const savedState = localStorage.getItem('billSplitterState');
         if (savedState) {
@@ -76,9 +73,8 @@ export default function BillSplitter() {
             setEditedFriends(new Set(parsed.editedFriends || []));
             setRestaurantName(parsed.restaurantName || "");
             setBillMeta(parsed.billMeta || { tax: 0, tip: 0, subtotal: 0 });
-            setAnimationStage(2); // Skip animation if data exists
+            setAnimationStage(2);
         } else {
-            // --- Animation for first time visit ---
             const timer1 = setTimeout(() => setAnimationStage(1), 1000); 
             const timer2 = setTimeout(() => setAnimationStage(2), 3000);
         }
@@ -95,7 +91,6 @@ export default function BillSplitter() {
     };
   }, []);
 
-  // --- Save State to localStorage ---
   useEffect(() => {
     if (!mounted) return;
     try {
@@ -116,7 +111,6 @@ export default function BillSplitter() {
     }
   }, [items, originalItems, friends, assignments, splitMode, percentages, editedFriends, restaurantName, billMeta, mounted]);
 
-
   const resetToEqualPercentages = () => {
     if (friends.length > 0) {
       const evenPercent = Math.floor((100 / friends.length) * 100) / 100;
@@ -132,7 +126,7 @@ export default function BillSplitter() {
   };
 
   useEffect(() => {
-    if (mounted) { // Ensure this runs after initial data load
+    if (mounted && friends.length > 0 && splitMode === 'percentage') {
         resetToEqualPercentages();
     }
   }, [friends.length, mounted]);
@@ -201,7 +195,6 @@ export default function BillSplitter() {
   const handleAssignToAll = (itemId: string) => {
     setAssignments(prev => {
       const currentAssignments = prev[itemId] || [];
-      // If all friends are already assigned, unassign all. Otherwise, assign all.
       if (friends.length > 0 && currentAssignments.length === friends.length) {
         return { ...prev, [itemId]: [] };
       }
@@ -274,7 +267,6 @@ export default function BillSplitter() {
     setEditedFriends(updatedEdited);
 
     const newPercents = { ...percentages, [friendName]: newValue };
-    
     const uneditedFriends = friends.filter(f => !updatedEdited.has(f));
     
     if (uneditedFriends.length > 0) {
@@ -317,7 +309,7 @@ export default function BillSplitter() {
 
   const handleResetSession = () => {
     localStorage.removeItem('billSplitterState');
-    window.location.reload(); // Easiest way to guarantee a clean slate and re-run entry animation
+    window.location.reload();
   };
 
   if (!mounted) return null;
@@ -334,9 +326,8 @@ export default function BillSplitter() {
       showFullLayout ? "py-4 md:py-8" : "pt-12 md:pt-24"
     )}>
       
-      {/* Fixed Theme Toggle */}
       {(animationStage >= 2 || isBillUploaded) && (
-        <div className="absolute right-4 top-4 md:top-8 z-[60] animate-in fade-in zoom-in duration-1000">
+        <div className="absolute right-4 top-4 md:top-8 z-[60] animate-in fade-in zoom-in duration-[1000ms]">
           <Button 
             variant="outline" 
             size="icon" 
@@ -348,13 +339,11 @@ export default function BillSplitter() {
         </div>
       )}
 
-      {/* Top Dynamic Spacer for centering */}
       <div className={cn(
         "transition-all duration-[4000ms] ease-in-out transform-gpu",
         isCenteredLayout ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
       )} />
 
-      {/* Success Dialog */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader className="flex flex-col items-center justify-center">
@@ -417,8 +406,6 @@ export default function BillSplitter() {
         </AlertDialogContent>
       </AlertDialog>
 
-
-      {/* Header & Logo Section */}
       <div className={cn(
         "transition-all duration-[4000ms] transform-gpu ease-in-out flex flex-col items-center justify-center w-full z-50",
         isCenteredLayout ? "mb-0" : "h-auto mb-2"
@@ -428,7 +415,7 @@ export default function BillSplitter() {
           isCenteredLayout && animationStage < 2 ? "scale-110 md:scale-125" : "scale-100"
         )}>
           <div className={cn(
-            "flex items-center justify-center gap-3 transition-all duration-1000",
+            "flex items-center justify-center gap-3 transition-all duration-[1000ms]",
             animationStage >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           )}>
             <div className="bg-primary p-2 md:p-3 rounded-2xl shadow-lg rotate-3 shrink-0">
@@ -448,7 +435,6 @@ export default function BillSplitter() {
         </div>
       </div>
 
-      {/* Main Content Reveal */}
       <div className={cn(
         "transition-all duration-[4000ms] transform-gpu flex flex-col w-full",
         animationStage < 2 && !isBillUploaded ? "opacity-0 pointer-events-none mt-0 h-0 overflow-hidden" : "opacity-100 translate-y-0 mt-4 h-auto"
@@ -492,7 +478,7 @@ export default function BillSplitter() {
 
               {showFullLayout && (
                 <>
-                  <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-1500">
+                  <section className="bg-card rounded-2xl p-6 shadow-sm border border-border animate-in slide-in-from-bottom-6 duration-[1500ms]">
                     <h3 className="text-lg font-headline font-bold flex items-center gap-2 mb-4">
                       <Receipt className="w-5 h-5 text-primary" />
                       Bill Summary
@@ -603,7 +589,7 @@ export default function BillSplitter() {
                   </TabsContent>
 
                   <TabsContent value="assign" className="mt-0 focus-visible:outline-none space-y-6">
-                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-1000">
+                    <div className="bg-card rounded-2xl p-6 border border-border shadow-sm animate-in slide-in-from-top-4 duration-[1000ms]">
                       <Label className="text-xs font-bold uppercase text-muted-foreground mb-4 block tracking-widest">Split Method</Label>
                       <RadioGroup 
                         value={splitMode} 
@@ -635,7 +621,7 @@ export default function BillSplitter() {
                     </div>
 
                     {splitMode === 'item-wise' && (
-                      <div className="space-y-6 animate-in fade-in duration-1000">
+                      <div className="space-y-6 animate-in fade-in duration-[1000ms]">
                         <div className="flex items-center justify-between mb-2">
                           <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Items</h2>
                           <div className="flex gap-2">
@@ -669,7 +655,7 @@ export default function BillSplitter() {
                     )}
 
                     {splitMode === 'equal' && (
-                      <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-1000">
+                      <div className="p-16 text-center bg-card rounded-2xl border-2 border-dashed border-primary/20 shadow-sm animate-in zoom-in-95 duration-[1000ms]">
                         <Scale className="w-16 h-16 text-primary mx-auto mb-6 opacity-80" />
                         <h3 className="text-2xl font-bold mb-3">Equal Split Active</h3>
                         <p className="text-sm text-muted-foreground max-w-md mx-auto">
@@ -685,7 +671,7 @@ export default function BillSplitter() {
                     )}
 
                     {splitMode === 'percentage' && (
-                      <div className="space-y-6 animate-in fade-in duration-1000">
+                      <div className="space-y-6 animate-in fade-in duration-[1000ms]">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <h2 className="text-xl md:text-2xl font-headline font-bold text-foreground">Percentages</h2>
@@ -710,7 +696,7 @@ export default function BillSplitter() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {friends.map(friend => (
-                            <Card key={friend} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md animate-in fade-in zoom-in-95 duration-700">
+                            <Card key={friend} className="overflow-hidden border-border bg-card shadow-sm transition-all hover:shadow-md animate-in fade-in zoom-in-95 duration-[700ms]">
                               <CardContent className="p-5 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                   <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -733,7 +719,7 @@ export default function BillSplitter() {
                     )}
 
                     {totalMismatch && (
-                      <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-1000">
+                      <Alert variant="destructive" className="mt-8 border-2 border-destructive/20 bg-destructive/5 rounded-2xl animate-in slide-in-from-top-6 duration-[1000ms]">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle className="font-bold">
                           {splitMode === 'percentage' ? `${(100 - totalPercentage).toFixed(2)}% remaining` : "Split incomplete"}
@@ -778,7 +764,6 @@ export default function BillSplitter() {
         )}
       </div>
 
-      {/* Bottom Dynamic Spacer for centering */}
       <div className={cn(
         "transition-all duration-[4000ms] ease-in-out transform-gpu",
         isCenteredLayout ? "flex-grow" : "h-0 opacity-0 pointer-events-none"
